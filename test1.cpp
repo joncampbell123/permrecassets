@@ -51,7 +51,7 @@ bool process_file(TextSourceBase &ts) {
     int c;
 
     while ((c=ts.getc_nl()) >= 0)
-        printf("%02x\n",c);
+        printf("%c",c);
 
     if (ts.error()) {
         fprintf(stderr,"File read error\n");
