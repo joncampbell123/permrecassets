@@ -68,8 +68,8 @@ int TextSourceBase::getc(void) {
     }
     else {
         assert(!in.empty());
-        c = in.front();
         in.pop_front();
+        c = in.front();
     }
 
     return c;
