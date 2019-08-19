@@ -121,11 +121,21 @@ bool process_file(TextSourceBase &ts) {
         /* read groups of numbers and letters as a word. */
         if (isalphanumeric(in[0])) {
             /* register individual words, as well as words-hyphenated-like-this */
-            std::string group_word,word;
+            std::string group_word,word,tmp;
 
             while (!in.empty() && isalphanumeric(in[0])) {
                 refill_deque(in,ts);
-                get_word(/*&*/word,in);// will also consume word
+                get_word(/*&*/tmp,in);// will also consume word
+                word = tmp;
+
+                // Initialisms like M.D. with no spaces
+                while (in.size() >= 2 && in[0] == '.' && isalphanumeric(in[1]) && tmp.size() < 4) {
+                    word += (char)in.front();
+                    in.pop_front(); // eat the '.'
+                    get_word(/*&*/tmp,in);// will also consume word
+                    word += tmp;
+                }
+
                 eat_wordspace(in);// eat space
                 if (!in.empty() && in[0] == '\n') { // eat newline
                     in.pop_front();
