@@ -82,6 +82,15 @@ public:
         ungetc(c);
         return c;
     }
+    virtual bool eof(void) const {
+        return _eof;
+    }
+    virtual bool error(void) const {
+        return _error;
+    }
+protected:
+    bool            _eof = false;
+    bool            _error = false;
 private:
     bool            _unget = false;
     int             _unget_c = -1;
@@ -116,10 +125,17 @@ public:
         return true;
     }
     virtual int getc_direct(void) {
-        if (is_open()) {
+        if (is_open() && !error() && !eof()) {
             char c;
             int rd = read(fd,&c,1);
-            if (rd < 1) return -1;
+            if (rd < 0) {
+                _error = true;
+                return rd;
+            }
+            else if (rd == 0) {
+                _eof = true;
+                return -1;
+            }
             return (int)((unsigned char)c);
         }
 
@@ -147,7 +163,14 @@ public:
         if (is_open()) {
             char c;
             int rd = read(0/*stdin*/,&c,1);
-            if (rd < 1) return -1;
+            if (rd < 0) {
+                _error = true;
+                return rd;
+            }
+            else if (rd == 0) {
+                _eof = true;
+                return -1;
+            }
             return (int)((unsigned char)c);
         }
 
@@ -158,8 +181,16 @@ public:
 bool process_file(TextSourceBase &ts) {
     int c;
 
-    while ((c=ts.getc()) >= 0) {
+    while ((c=ts.getc()) >= 0)
         printf("%02x\n",c);
+
+    if (ts.error()) {
+        fprintf(stderr,"File read error\n");
+        return false;
+    }
+    if (!ts.eof()) {
+        fprintf(stderr,"File not eof\n");
+        return false;
     }
 
     return true;
