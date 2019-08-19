@@ -9,6 +9,8 @@
 
 #include "textsrc.hpp"
 
+#include "json11.hpp"
+
 #ifndef O_BINARY
 #define O_BINARY (0)
 #endif
