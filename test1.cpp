@@ -43,6 +43,11 @@ int main(int argc,char **argv) {
     if (!parse_argv(argc,argv))
         return 1;
 
+    if (files.empty()) {
+        fprintf(stderr,"Please specify files to parse\n");
+        return 1;
+    }
+
     return 0;
 }
 
