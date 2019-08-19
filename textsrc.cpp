@@ -62,8 +62,8 @@ int TextSourceBase::getc(void) {
         }
         else {
             /* 0x0A (Unix) or 0x0D (Mac OS) */
-            c = '\n';
             in.pop_front();
+            c = '\n';
         }
     }
     else {
