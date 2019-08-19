@@ -59,6 +59,32 @@ public:
     virtual bool open(void) {
         return false;
     }
+    virtual int getc_direct(void) {
+        return -1;
+    }
+    virtual int getc(void) {
+        if (_unget) {
+            _unget = false;
+            return _unget_c;
+        }
+
+        return getc_direct();
+    }
+    virtual bool ungetc(int c) {
+        if (_unget) return false;
+        _unget_c = c;
+        _unget = true;
+        return true;
+    }
+    virtual int peekc(void) {
+        int c = getc();
+        if (c < 0) return c;
+        ungetc(c);
+        return c;
+    }
+private:
+    bool            _unget = false;
+    int             _unget_c = -1;
 };
 
 class TextSource : public TextSourceBase {
@@ -89,6 +115,17 @@ public:
 
         return true;
     }
+    virtual int getc_direct(void) {
+        if (is_open()) {
+            char c;
+            int rd = read(fd,&c,1);
+            if (rd < 1) return -1;
+            return (int)((unsigned char)c);
+        }
+
+        return -1;
+    }
+private:
 public:
     int             fd = -1;
     string          path;
@@ -106,9 +143,25 @@ public:
     virtual bool open(void) {
         return true;
     }
+    virtual int getc_direct(void) {
+        if (is_open()) {
+            char c;
+            int rd = read(0/*stdin*/,&c,1);
+            if (rd < 1) return -1;
+            return (int)((unsigned char)c);
+        }
+
+        return -1;
+    }
 };
 
 bool process_file(TextSourceBase &ts) {
+    int c;
+
+    while ((c=ts.getc()) >= 0) {
+        printf("%02x\n",c);
+    }
+
     return true;
 }
 
