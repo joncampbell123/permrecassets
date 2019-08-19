@@ -4,6 +4,7 @@
 #include <cstring>
 #include <string>
 #include <vector>
+#include <assert.h>
 #include <unistd.h>
 #include <fcntl.h>
 
@@ -37,7 +38,41 @@ int TextSourceBase::getc_direct(void) {
 }
 
 int TextSourceBase::getc(void) {
-    return getc_direct();
+    int c;
+
+    while (!eof() && !error() && in.size() < 8) /* 8 chars should be MORE than enough for even weird esoteric newline sequences */
+        in.push_back(getc_direct()); /* WARNING: May include -1 at eof which is OK */
+
+    if (in.empty())
+        return -1;
+
+    /* match newline sequences */
+    /* ASSUME: in.size() > 0 because !in.empty() */
+    assert(in.size() > 0);
+    if (in[0] == 0x0D || in[0] == 0x0A) { /* newline? */
+        if (in.size() >= 3 && in[0] == 0x0D && in[1] == 0x0D && in[2] == 0x0A) {
+            /* strange 0x0D 0x0D 0x0A seen in some old internet docs */
+            for (size_t i=0;i < 3;i++) in.pop_front();
+            c = '\n';
+        }
+        else if (in.size() >= 2 && in[0] == 0x0D && in[1] == 0x0A) {
+            /* 0x0D 0x0A MS-DOS style */
+            for (size_t i=0;i < 2;i++) in.pop_front();
+            c = '\n';
+        }
+        else {
+            /* 0x0A (Unix) or 0x0D (Mac OS) */
+            c = '\n';
+            in.pop_front();
+        }
+    }
+    else {
+        assert(!in.empty());
+        c = in.front();
+        in.pop_front();
+    }
+
+    return c;
 }
 
 bool TextSourceBase::eof(void) const {
