@@ -27,6 +27,21 @@ struct WordToken {
 
 map<string,WordToken>           words;
 
+std::string filter_word(const std::string &raw_word) {
+    std::string res = raw_word;
+
+    for (auto &c : res) c = tolower(c);
+
+    return res;
+}
+
+void count_word(const std::string &raw_word) {
+    std::string filtered_word = filter_word(raw_word);
+
+    if (!filtered_word.empty())
+        words[filtered_word].count++;
+}
+
 static void help(void) {
     fprintf(stderr,"TODO\n");
 }
@@ -144,7 +159,7 @@ bool process_file(TextSourceBase &ts) {
                 refill_deque(in,ts);
                 group_word += word;
 
-                printf("Word: %s\n",word.c_str());
+                count_word(word);
 
                 // if the next is a hyphen/separator followed by space and another word, then eat the hypen and parse the next word
                 if (!in.empty() && ishyphen(in[0])) {
@@ -167,7 +182,7 @@ bool process_file(TextSourceBase &ts) {
             }
 
             if (word != group_word)
-                printf("Group: %s\n",group_word.c_str());
+                count_word(group_word);
         }
         else {
             /* drop it */
@@ -215,6 +230,9 @@ int main(int argc,char **argv) {
             return 1;
         }
     }
+
+    for (auto &wordent : words)
+        printf("'%s' x %d times\n",wordent.first.c_str(),wordent.second.count);
 
     return 0;
 }
