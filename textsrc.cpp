@@ -52,24 +52,24 @@ int TextSourceBase::getc(void) {
     if (in[0] == 0x0D || in[0] == 0x0A) { /* newline? */
         if (in.size() >= 3 && in[0] == 0x0D && in[1] == 0x0D && in[2] == 0x0A) {
             /* strange 0x0D 0x0D 0x0A seen in some old internet docs */
-            for (size_t i=0;i < 3;i++) in.pop_front();
             c = '\n';
+            for (size_t i=0;i < 3;i++) in.pop_front();
         }
         else if (in.size() >= 2 && in[0] == 0x0D && in[1] == 0x0A) {
             /* 0x0D 0x0A MS-DOS style */
-            for (size_t i=0;i < 2;i++) in.pop_front();
             c = '\n';
+            for (size_t i=0;i < 2;i++) in.pop_front();
         }
         else {
             /* 0x0A (Unix) or 0x0D (Mac OS) */
-            in.pop_front();
             c = '\n';
+            in.pop_front();
         }
     }
     else {
         assert(!in.empty());
-        in.pop_front();
         c = in.front();
+        in.pop_front();
     }
 
     return c;
