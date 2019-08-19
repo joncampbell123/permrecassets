@@ -62,6 +62,30 @@ public:
     virtual int getc_direct(void) {
         return -1;
     }
+    virtual int getc_nl(void) {
+        /* for use in reading without considering newline formatting */
+        int c = getc();
+        if (c < 0) return -1;
+
+        /* 0x0A             Unix    \n          LF
+         * 0x0D 0x0A        DOS     \r\n        CR LF
+         * 0x0D             Mac     \r          CR
+         *
+         * For simplicity we do NOT support oddball constructions like 0x0D 0x0D 0x0A! */
+        if (c == 0x0D) {
+            c = getc();
+            if (c != 0x0A) {
+                if (!ungetc(c)) return -1;
+            }
+
+            return '\n';
+        }
+        else if (c == 0x0A) {
+            return '\n';
+        }
+
+        return c;
+    }
     virtual int getc(void) {
         if (_unget) {
             _unget = false;
@@ -75,12 +99,6 @@ public:
         _unget_c = c;
         _unget = true;
         return true;
-    }
-    virtual int peekc(void) {
-        int c = getc();
-        if (c < 0) return c;
-        ungetc(c);
-        return c;
     }
     virtual bool eof(void) const {
         return _eof;
@@ -181,7 +199,7 @@ public:
 bool process_file(TextSourceBase &ts) {
     int c;
 
-    while ((c=ts.getc()) >= 0)
+    while ((c=ts.getc_nl()) >= 0)
         printf("%02x\n",c);
 
     if (ts.error()) {
