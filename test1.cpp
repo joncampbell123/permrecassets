@@ -108,17 +108,21 @@ public:
     }
 };
 
+bool process_file(TextSourceBase &ts) {
+    return true;
+}
+
 bool process_file(const string &path) {
     if (path == "-"/*stdin*/) {
         TextSourceStdin src;
         if (!src.is_open()) return false;
+        return process_file(src);
     }
     else {
         TextSource src(path);
         if (!src.is_open()) return false;
+        return process_file(src);
     }
-
-    return true;
 }
 
 int main(int argc,char **argv) {
