@@ -2,7 +2,9 @@
 #include <cstdio>
 #include <iostream>
 #include <cstring>
+#include <vector>
 #include <string>
+#include <stack>
 
 class TextSourceBase {
 public:
@@ -18,11 +20,10 @@ public:
     virtual bool eof(void) const;
     virtual bool error(void) const;
 protected:
-    bool            _eof = false;
-    bool            _error = false;
+    bool                _eof = false;
+    bool                _error = false;
 private:
-    bool            _unget = false;
-    int             _unget_c = -1;
+    std::stack<int>     _unget;
 };
 
 class TextSource : public TextSourceBase {

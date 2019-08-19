@@ -62,18 +62,17 @@ int TextSourceBase::getc_nl(void) {
 }
 
 int TextSourceBase::getc(void) {
-    if (_unget) {
-        _unget = false;
-        return _unget_c;
+    if (!_unget.empty()) {
+        const int c = _unget.top();
+        _unget.pop();
+        return c;
     }
 
     return getc_direct();
 }
 
 bool TextSourceBase::ungetc(int c) {
-    if (_unget) return false;
-    _unget_c = c;
-    _unget = true;
+    _unget.push(c);
     return true;
 }
 
