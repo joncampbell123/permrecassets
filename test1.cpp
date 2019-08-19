@@ -25,7 +25,7 @@ static bool parse_argv(int argc,char **argv) {
 
     while (i < argc) {
         a = argv[i++];
-        if (*a == '-') {
+        if (a[0] == '-' && a[1] != 0) { /* - alone is not a switch */
             do { a++; } while (*a == '-');
 
             if (!strcmp(a,"h")) {
