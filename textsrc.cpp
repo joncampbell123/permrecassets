@@ -43,13 +43,27 @@ int TextSourceBase::getc_nl(void) {
 
     /* 0x0A             Unix    \n          LF
      * 0x0D 0x0A        DOS     \r\n        CR LF
+     * 0x0D 0x0D 0x0A   ????    \r\r\n      CR CR LF
      * 0x0D             Mac     \r          CR
-     *
-     * For simplicity we do NOT support oddball constructions like 0x0D 0x0D 0x0A! */
+     */
     if (c == 0x0D) {
         c = getc();
-        if (c != 0x0A) {
-            if (!ungetc(c)) return -1;
+        if (c == 0x0D) {
+            const int c2 = getc();
+            if (c2 == 0x0A) { /* CR CR LF */
+                return '\n';
+            }
+            else {
+                ungetc(c2);
+                ungetc(c);
+            }
+        }
+        else if (c == 0x0A) {
+            /* CR LF */
+        }
+        else {
+            /* CR */
+            ungetc(c);
         }
 
         return '\n';
