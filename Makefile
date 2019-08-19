@@ -7,8 +7,10 @@ all: $(PROGS)
 clean:
 	rm -f $(PROGS) *.o
 
-test1: test1.o
-	g++ $(LDFLAGS) -o $@ $<
+test1: test1.o textsrc.o
+	g++ $(LDFLAGS) -o $@ $^
 test1.o: test1.cpp
-	g++ $(CXXFLAGS) -c -o $@ $<
+	g++ $(CXXFLAGS) -c -o $@ $^
+textsrc.o: textsrc.cpp
+	g++ $(CXXFLAGS) -c -o $@ $^
 
