@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <stack>
+#include <deque>
 
 class TextSourceBase {
 public:
@@ -14,16 +15,14 @@ public:
     virtual void close(void);
     virtual bool open(void);
     virtual int getc_direct(void);
-    virtual int getc_nl(void);
     virtual int getc(void);
-    virtual bool ungetc(int c);
     virtual bool eof(void) const;
     virtual bool error(void) const;
 protected:
     bool                _eof = false;
     bool                _error = false;
 private:
-    std::stack<int>     _unget;
+    std::deque<int>     in;
 };
 
 class TextSource : public TextSourceBase {

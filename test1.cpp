@@ -50,7 +50,7 @@ static bool parse_argv(int argc,char **argv) {
 bool process_file(TextSourceBase &ts) {
     int c;
 
-    while ((c=ts.getc_nl()) >= 0)
+    while ((c=ts.getc()) >= 0)
         printf("%c",c);
 
     if (ts.error()) {

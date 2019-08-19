@@ -36,58 +36,8 @@ int TextSourceBase::getc_direct(void) {
     return -1;
 }
 
-int TextSourceBase::getc_nl(void) {
-    /* for use in reading without considering newline formatting */
-    int c = getc();
-    if (c < 0) return -1;
-
-    /* 0x0A             Unix    \n          LF
-     * 0x0D 0x0A        DOS     \r\n        CR LF
-     * 0x0D 0x0D 0x0A   ????    \r\r\n      CR CR LF
-     * 0x0D             Mac     \r          CR
-     */
-    if (c == 0x0D) {
-        c = getc();
-        if (c == 0x0D) {
-            const int c2 = getc();
-            if (c2 == 0x0A) { /* CR CR LF */
-                return '\n';
-            }
-            else {
-                ungetc(c2);
-                ungetc(c);
-            }
-        }
-        else if (c == 0x0A) {
-            /* CR LF */
-        }
-        else {
-            /* CR */
-            ungetc(c);
-        }
-
-        return '\n';
-    }
-    else if (c == 0x0A) {
-        return '\n';
-    }
-
-    return c;
-}
-
 int TextSourceBase::getc(void) {
-    if (!_unget.empty()) {
-        const int c = _unget.top();
-        _unget.pop();
-        return c;
-    }
-
     return getc_direct();
-}
-
-bool TextSourceBase::ungetc(int c) {
-    _unget.push(c);
-    return true;
 }
 
 bool TextSourceBase::eof(void) const {
