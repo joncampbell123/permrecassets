@@ -1,4 +1,4 @@
-PROGS=test1 test2 test3
+PROGS=test1 test2 test3 test4
 
 CXXFLAGS=-std=c++11 -Wall -Wextra -pedantic
 
@@ -20,6 +20,11 @@ test2.o: test2.cpp
 test3: test3.o textsrc.o
 	g++ $(LDFLAGS) -o $@ $^
 test3.o: test3.cpp
+	g++ $(CXXFLAGS) -c -o $@ $^
+
+test4: test4.o textsrc.o
+	g++ $(LDFLAGS) -o $@ $^
+test4.o: test4.cpp
 	g++ $(CXXFLAGS) -c -o $@ $^
 
 textsrc.o: textsrc.cpp
