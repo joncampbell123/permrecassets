@@ -16,6 +16,8 @@
 #define O_BINARY (0)
 #endif
 
+#include <algorithm>
+
 using namespace std;
 
 vector<string>      files;
@@ -23,10 +25,10 @@ vector<string>      files;
 struct WordToken {
     /* first of map pair is the word */
     unsigned int                count = 0;
-    map<string,unsigned int>    prior,next;
 };
 
 map<string,WordToken>           words;
+signed long long                total_words = 0;
 
 std::string filter_word(const std::string &raw_word) {
     std::string res = raw_word;
@@ -41,16 +43,6 @@ void count_word(const std::string &raw_word) {
 
     if (!filtered_word.empty())
         words[filtered_word].count++;
-}
-
-void count_prev_word(const std::string &raw_word,const std::string &raw_prev_word) {
-    std::string filtered_word = filter_word(raw_word);
-    std::string filtered_prev_word = filter_word(raw_prev_word);
-
-    if (!filtered_word.empty() && !filtered_prev_word.empty()) {
-        words[filtered_word].prior[filtered_prev_word]++;
-        words[filtered_prev_word].next[filtered_word]++;
-    }
 }
 
 static void help(void) {
@@ -137,7 +129,6 @@ void get_word(std::string &word,std::deque<int> &in) {
 }
 
 bool process_file(TextSourceBase &ts) {
-    std::string prev_word,prev_group_word;
     std::deque<int> in;
 
     do {
@@ -153,6 +144,7 @@ bool process_file(TextSourceBase &ts) {
             while (!in.empty() && isalphanumeric(in[0])) {
                 refill_deque(in,ts);
                 get_word(/*&*/tmp,in);// will also consume word
+                total_words++;
                 word = tmp;
 
                 // Initialisms like M.D. with no spaces
@@ -172,9 +164,6 @@ bool process_file(TextSourceBase &ts) {
                 group_word += word;
 
                 count_word(word);
-                if (!prev_word.empty())
-                    count_prev_word(word,prev_word);
-                prev_word = word;
 
                 // if the next is a hyphen/separator followed by space and another word, then eat the hypen and parse the next word
                 if (!in.empty() && ishyphen(in[0])) {
@@ -196,15 +185,8 @@ bool process_file(TextSourceBase &ts) {
                 }
             }
 
-            if (word != group_word) {
+            if (word != group_word)
                 count_word(group_word);
-                if (!prev_group_word.empty())
-                    count_prev_word(group_word,prev_group_word);
-                else if (!prev_word.empty())
-                    count_prev_word(group_word,prev_word);
-            }
-
-            prev_group_word = group_word;
         }
         else {
             /* drop it */
@@ -253,19 +235,19 @@ int main(int argc,char **argv) {
         }
     }
 
-    for (auto &wordent : words) {
-        printf("'%s' x %d times\n",wordent.first.c_str(),wordent.second.count);
-        if (!wordent.second.prior.empty()) {
-            printf("    Prior word:\n");
-            for (auto &pwordent : wordent.second.prior)
-                printf("        '%s' x %d times\n",pwordent.first.c_str(),pwordent.second);
-        }
-        if (!wordent.second.next.empty()) {
-            printf("    Next word:\n");
-            for (auto &nwordent : wordent.second.next)
-                printf("        '%s' x %d times\n",nwordent.first.c_str(),nwordent.second);
-        }
-    }
+    if (total_words == 0)
+        total_words = 1;
+
+    vector< pair<double,string> > res;
+
+    for (auto &wordent : words)
+        res.push_back( pair<double,string>((double)wordent.second.count / total_words,wordent.first) );
+
+    sort(res.begin(), res.end());
+    reverse(res.begin(), res.end());
+
+    for (auto &result : res)
+        printf("%.6f: %s x %d\n",result.first,result.second.c_str(),words[result.second].count);
 
     return 0;
 }
