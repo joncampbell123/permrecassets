@@ -256,7 +256,7 @@ int main(int argc,char **argv) {
 
     {
         string res;
-        json11::Json json = json11::Json::object { {"results", resa} };
+        json11::Json json = json11::Json::object { {"highest count", double(highest_word_count)}, {"word count", double(words.size())}, {"results", resa} };
         json.dump(res);
         printf("%s\n",res.c_str());
     }
