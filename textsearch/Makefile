@@ -2,10 +2,15 @@ PROGS=test1 test2 test3 test4
 
 CXXFLAGS=-std=c++11 -Wall -Wextra -pedantic
 
-all: $(PROGS)
+JSON11=json11.o
+
+all: $(PROGS) $(JSON11)
 
 clean:
 	rm -f $(PROGS) *.o
+
+json11.o: json11.cpp
+	g++ $(CXXFLAGS) -c -o $@ $^
 
 test1: test1.o textsrc.o
 	g++ $(LDFLAGS) -o $@ $^
