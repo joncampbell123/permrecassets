@@ -4,6 +4,10 @@ CXXFLAGS=-std=c++11 -Wall -Wextra -pedantic
 
 JSON11=json11.o
 
+install: text-dictionary
+	mkdir -p $(DESTDIR)/usr/bin/
+	cp -v text-dictionary $(DESTDIR)/usr/bin/
+
 all: $(PROGS) $(JSON11)
 
 clean:
