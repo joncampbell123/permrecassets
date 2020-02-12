@@ -1,0 +1,11 @@
+#!/bin/bash
+tool=`which pdftotext`
+if [ -z "$tool" ]; then echo "This tool $0 requires pdftotext"; exit 1; fi
+
+infile="$1"
+if [ -z "$infile" ]; then echo "Please specify input file"; exit 1; fi
+
+# NTS: pdftotext will by default convert the PDF to text and write it to PDF.txt.
+#      This tool needs pdftotext to convert to stdout instead, which is why the second argv is -
+"$tool" -- "$infile" "-" | text-dictionary -
+
