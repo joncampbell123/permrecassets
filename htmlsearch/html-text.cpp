@@ -133,6 +133,9 @@ string getTextBODY(htmlHeader &header,xmlNodePtr node,xmlDocPtr doc) {
         else if (!xmlStrcmp(node->name,(const xmlChar*)"ul")) {
             ret += "\n" + getTextUL(header,node->children,doc) + "\n";
         }
+        else if (!xmlStrcmp(node->name,(const xmlChar*)"ol")) {
+            ret += "\n" + getTextUL(header,node->children,doc) + "\n"; // HACK
+        }
         else {
             ret += " " + getTextBODY(header,node->children,doc) + " "; // DEFAULT
 
