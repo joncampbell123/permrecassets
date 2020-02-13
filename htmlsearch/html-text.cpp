@@ -61,6 +61,31 @@ string getTextBODY(htmlHeader &header,xmlNodePtr node,xmlDocPtr doc) {
     (void)doc;
 
     for (;node!=NULL;node=node->next) {
+        if (!xmlStrcmp(node->name,(const xmlChar*)"text")) {
+            ret += getTextGenericHTML(header,node,doc) + " ";
+        }
+        else if (!xmlStrcmp(node->name,(const xmlChar*)"p")) {
+            ret += "\t" + getTextBODY(header,node->children,doc) + "\n\n";
+        }
+        else if (!xmlStrcmp(node->name,(const xmlChar*)"pre")) {
+            ret += "\n" + getTextBODY(header,node->children,doc) + "\n";
+        }
+        else if (!xmlStrcmp(node->name,(const xmlChar*)"h1") ||
+                 !xmlStrcmp(node->name,(const xmlChar*)"h2") ||
+                 !xmlStrcmp(node->name,(const xmlChar*)"h3")) {
+            ret += "\t" + getTextBODY(header,node->children,doc) + "\n\n";
+        }
+        else if (!xmlStrcmp(node->name,(const xmlChar*)"br")) {
+            ret += "\n";
+        }
+        else if (!xmlStrcmp(node->name,(const xmlChar*)"tt")) {
+            ret += " " + getTextBODY(header,node->children,doc) + " ";
+        }
+        else {
+            ret += " " + getTextBODY(header,node->children,doc) + " "; // DEFAULT
+
+            fprintf(stderr,"WARNING: Unknown HTML tag '%s'\n",node->name);
+        }
     }
 
     return ret;
