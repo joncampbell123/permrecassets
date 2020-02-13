@@ -136,6 +136,18 @@ string getTextBODY(htmlHeader &header,xmlNodePtr node,xmlDocPtr doc) {
         else if (!xmlStrcmp(node->name,(const xmlChar*)"ol")) {
             ret += "\n" + getTextUL(header,node->children,doc) + "\n"; // HACK
         }
+        else if (!xmlStrcmp(node->name,(const xmlChar*)"table")) {
+            ret += "\n" + getTextBODY(header,node->children,doc) + "\n"; // HACK
+        }
+        else if (!xmlStrcmp(node->name,(const xmlChar*)"tbody")) {
+            ret += "\n" + getTextBODY(header,node->children,doc) + "\n"; // HACK
+        }
+        else if (!xmlStrcmp(node->name,(const xmlChar*)"tr")) {
+            ret += "\n" + getTextBODY(header,node->children,doc) + "\n"; // HACK
+        }
+        else if (!xmlStrcmp(node->name,(const xmlChar*)"td")) {
+            ret += "\n" + getTextBODY(header,node->children,doc) + "\n"; // HACK
+        }
         else {
             ret += " " + getTextBODY(header,node->children,doc) + " "; // DEFAULT
 
