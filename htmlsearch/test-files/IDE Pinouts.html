@@ -1,0 +1,61 @@
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+<title>IDE Pinouts</title>
+</head><body text="black" bgcolor="white">
+<font size="5">IDE Interface Pinouts</font>
+<p>
+</p><pre><tt>
+    The pinouts are as follows:  (_NAME means signal active low)
+    Name      2.5"   3.5"    Desc
+    _RESET  |   1  |   1  |  Drive reset
+    GROUND  |   2  |   2  |
+    DD7     |   3  |   3  |  Drive data bus bit 7
+    DD8     |   4  |   4  |  Drive data bus bit 8
+    DD6     |   5  |   5  |  Drive data bus bit 6
+    DD9     |   6  |   6  |  Drive data bus bit 9
+    DD5     |   7  |   7  |  Drive data bus bit 5
+    DD10    |   8  |   8  |  Drive data bus bit 10
+    DD4     |   9  |   9  |  Drive data bus bit 4
+    DD11    |  10  |  10  |  Drive data bus bit 11
+    DD3     |  11  |  11  |  Drive data bus bit 3
+    DD12    |  12  |  12  |  Drive data bus bit 12
+    DD2     |  13  |  13  |  Drive data bus bit 2
+    DD13    |  14  |  14  |  Drive data bus bit 13
+    DD1     |  15  |  15  |  Drive data bus bit 1
+    DD14    |  16  |  16  |  Drive data bus bit 14
+    DD0     |  17  |  17  |  Drive data bus bit 0
+    DD15    |  18  |  18  |  Drive data bus bit 15
+    GROUND  |  19  |  19  |
+    key     |  20  |  20  |  Key for interface connector
+    DMARQ   |  21  |  21  |  DMA request (not supported yet)
+    GROUND  |  22  |  22  |
+    _DIOW   |  23  |  23  |  Drive I/O write
+    GROUND  |  24  |  24  |
+    _DIOR   |  25  |  25  |  Drive I/O read
+    GROUND  |  26  |  26  |
+    IORDY   |  27  |  27  |  I/O channel ready
+    SPSYNC  |  28  |  28  |  Spindle sync (not supported yet)
+    _DMACK  |  29  |  29  |  DMA acknowledge (not supported yet)
+    GROUND  |  30  |  30  |
+    INTRQ   |  31  |  31  |  Drive interrupt
+    _IOCS16 |  32  |  32  |  Drive 16 bit I/O
+    DA1     |  33  |  33  |  Drive address bus bit 1
+    _PDIAG  |  34  |  34  |  Passed diagnostics
+    DA0     |  35  |  35  |  Drive address bus bit 0
+    DA2     |  36  |  36  |  Drive address bus bit 2
+    _CS1FX  |  37  |  37  |  Chip select 0
+    _CS3FX  |  38  |  38  |  Chip select 1
+    _DASP   |  39  |  39  |  Drive active/slave present
+    GROUND  |  40  |  40  |
+    +5v     |  41  |  --  |  +5v supply
+    +5v     |  42  |  --  |  +5v supply
+    GROUND  |  43  |  --  |
+    RESERVED|  44  |  --  |  Reserved for future definition
+    As you can see, apart from the power pins, all the signals are exactly the
+same.  The ones that say 'not supported yet' should still be connected.
+The 44pin connector isn't a normal .1" IDC header, it's more like .075".
+Spacing of the pins is 2mm with a 1mm cable.
+</tt></pre><tt></tt>
+      
+</body></html>
