@@ -1,0 +1,1192 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+		<meta name="generator" content="HTML Tidy, see www.w3.org">
+		<title>DMA</title>
+		<meta name="GENERATOR" content="Modular DocBook HTML Stylesheet Version 1.79">
+		<link rel="HOME" title="FreeBSD Developers' Handbook" href="http://www.freebsd.org/doc/en/books/developers-handbook/index.html">
+		<link rel="UP" title="Kernel" href="http://www.freebsd.org/doc/en/books/developers-handbook/kernel.html">
+		<link rel="PREVIOUS" title="Kernel" href="http://www.freebsd.org/doc/en/books/developers-handbook/kernel.html">
+		<link rel="NEXT" title="Building and Installing a FreeBSD Kernel" href="http://www.freebsd.org/doc/en/books/developers-handbook/kernelbuild.html">
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<style>@media print {#ghostery-purple-box {display:none !important}}</style></head>
+	<body class="CHAPTER" vlink="#840084" text="#000000" link="#0000ff" bgcolor="#ffffff" alink="#0000ff">
+		<div class="NAVHEADER">
+			<table summary="Header navigation table" width="100%" cellspacing="0" cellpadding="0" border="0"><tbody>
+					<tr>
+						<th colspan="3" align="center">FreeBSD Developers' Handbook</th>
+					</tr>
+					<tr>
+						<td width="10%" valign="bottom" align="left"><a href="http://www.freebsd.org/doc/en/books/developers-handbook/kernel.html" accesskey="P">Prev</a></td>
+						<td width="80%" valign="bottom" align="center"></td>
+						<td width="10%" valign="bottom" align="right"><a href="http://www.freebsd.org/doc/en/books/developers-handbook/kernelbuild.html" accesskey="N">Next</a></td>
+					</tr>
+			</tbody></table>
+			<hr width="100%" align="left">
+		</div>
+		
+		<div class="CHAPTER">
+			<h1>
+				<a id="DMA" name="DMA"></a>Chapter 9 DMA</h1>
+			
+			<div class="SECT1">
+				<h1 class="SECT1"><a id="DMA-BASICS" name="DMA-BASICS">9.1 DMA: What it is and How it
+						Works</a></h1>
+				
+				<p><span class="emphasis"><i class="EMPHASIS">Copyright © 1995,1997 Frank Durda IV
+						<code class="EMAIL">&lt;<a href="mailto:uhclem@FreeBSD.org">uhclem@FreeBSD.org</a>&gt;</code>, All Rights Reserved.
+						10 December 1996. Last Update 8 October 1997.</i></span></p>
+				
+				<p>Direct Memory Access (DMA) is a method of allowing data to be moved from one location
+				to another in a computer without intervention from the central processor (CPU).</p>
+				
+				<p>The way that the DMA function is implemented varies between computer architectures, so
+				this discussion will limit itself to the implementation and workings of the DMA subsystem
+				on the IBM Personal Computer (PC), the IBM PC/AT and all of its successors and
+				clones.</p>
+				
+				<p>The PC DMA subsystem is based on the <span class="TRADEMARK">Intel</span>® 8237
+				DMA controller. The 8237 contains four DMA channels that can be programmed independently
+				and any one of the channels may be active at any moment. These channels are numbered 0,
+				1, 2 and 3. Starting with the PC/AT, IBM added a second 8237 chip, and numbered those
+				channels 4, 5, 6 and 7.</p>
+				
+				<p>The original DMA controller (0, 1, 2 and 3) moves one byte in each transfer. The
+				second DMA controller (4, 5, 6, and 7) moves 16-bits from two adjacent memory locations
+				in each transfer, with the first byte always coming from an even-numbered address. The
+				two controllers are identical components and the difference in transfer size is caused by
+				the way the second controller is wired into the system.</p>
+				
+				<p>The 8237 has two electrical signals for each channel, named DRQ and -DACK. There are
+				additional signals with the names HRQ (Hold Request), HLDA (Hold Acknowledge), -EOP (End
+				of Process), and the bus control signals -MEMR (Memory Read), -MEMW (Memory Write), -IOR
+				(I/O Read), and -IOW (I/O Write).</p>
+				
+				<p>The 8237 DMA is known as a “fly-by” DMA controller. This means that the
+				data being moved from one location to another does not pass through the DMA chip and is
+				not stored in the DMA chip. Subsequently, the DMA can only transfer data between an I/O
+				port and a memory address, but not between two I/O ports or two memory locations.</p>
+				
+				<div class="NOTE">
+					<blockquote class="NOTE">
+						<p><b>Note:</b> The 8237 does allow two channels to be connected together to allow
+						memory-to-memory DMA operations in a non-“fly-by” mode, but nobody in the PC
+						industry uses this scarce resource this way since it is faster to move data between
+						memory locations using the CPU.</p>
+					</blockquote>
+				</div>
+				
+				<p>In the PC architecture, each DMA channel is normally activated only when the hardware
+				that uses a given DMA channel requests a transfer by asserting the DRQ line for that
+				channel.</p>
+				
+				<div class="SECT2">
+					<h2 class="SECT2"><a id="AEN3435" name="AEN3435">9.1.1 A Sample DMA transfer</a></h2>
+					
+					<p>Here is an example of the steps that occur to cause and perform a DMA transfer. In
+					this example, the floppy disk controller (FDC) has just read a byte from a diskette and
+					wants the DMA to place it in memory at location 0x00123456. The process begins by the FDC
+					asserting the DRQ2 signal (the DRQ line for DMA channel 2) to alert the DMA
+					controller.</p>
+					
+					<p>The DMA controller will note that the DRQ2 signal is asserted. The DMA controller will
+					then make sure that DMA channel 2 has been programmed and is unmasked (enabled). The DMA
+					controller also makes sure that none of the other DMA channels are active or want to be
+					active and have a higher priority. Once these checks are complete, the DMA asks the CPU
+					to release the bus so that the DMA may use the bus. The DMA requests the bus by asserting
+					the HRQ signal which goes to the CPU.</p>
+					
+					<p>The CPU detects the HRQ signal, and will complete executing the current instruction.
+					Once the processor has reached a state where it can release the bus, it will. Now all of
+					the signals normally generated by the CPU (-MEMR, -MEMW, -IOR, -IOW and a few others) are
+					placed in a tri-stated condition (neither high or low) and then the CPU asserts the HLDA
+					signal which tells the DMA controller that it is now in charge of the bus.</p>
+					
+					<p>Depending on the processor, the CPU may be able to execute a few additional
+					instructions now that it no longer has the bus, but the CPU will eventually have to wait
+					when it reaches an instruction that must read something from memory that is not in the
+					internal processor cache or pipeline.</p>
+					
+					<p>Now that the DMA “is in charge”, the DMA activates its -MEMR, -MEMW, -IOR,
+					-IOW output signals, and the address outputs from the DMA are set to 0x3456, which will
+					be used to direct the byte that is about to transferred to a specific memory
+					location.</p>
+					
+					<p>The DMA will then let the device that requested the DMA transfer know that the
+					transfer is commencing. This is done by asserting the -DACK signal, or in the case of the
+					floppy disk controller, -DACK2 is asserted.</p>
+					
+					<p>The floppy disk controller is now responsible for placing the byte to be transferred
+					on the bus Data lines. Unless the floppy controller needs more time to get the data byte
+					on the bus (and if the peripheral does need more time it alerts the DMA via the READY
+					signal), the DMA will wait one DMA clock, and then de-assert the -MEMW and -IOR signals
+					so that the memory will latch and store the byte that was on the bus, and the FDC will
+					know that the byte has been transferred.</p>
+					
+					<p>Since the DMA cycle only transfers a single byte at a time, the FDC now drops the DRQ2
+					signal, so the DMA knows that it is no longer needed. The DMA will de-assert the -DACK2
+					signal, so that the FDC knows it must stop placing data on the bus.</p>
+					
+					<p>The DMA will now check to see if any of the other DMA channels have any work to do. If
+					none of the channels have their DRQ lines asserted, the DMA controller has completed its
+					work and will now tri-state the -MEMR, -MEMW, -IOR, -IOW and address signals.</p>
+					
+					<p>Finally, the DMA will de-assert the HRQ signal. The CPU sees this, and de-asserts the
+					HOLDA signal. Now the CPU activates its -MEMR, -MEMW, -IOR, -IOW and address lines, and
+					it resumes executing instructions and accessing main memory and the peripherals.</p>
+					
+					<p>For a typical floppy disk sector, the above process is repeated 512 times, once for
+					each byte. Each time a byte is transferred, the address register in the DMA is
+					incremented and the counter in the DMA that shows how many bytes are to be transferred is
+					decremented.</p>
+					
+					<p>When the counter reaches zero, the DMA asserts the EOP signal, which indicates that
+					the counter has reached zero and no more data will be transferred until the DMA
+					controller is reprogrammed by the CPU. This event is also called the Terminal Count (TC).
+					There is only one EOP signal, and since only one DMA channel can be active at any
+					instant, the DMA channel that is currently active must be the DMA channel that just
+					completed its task.</p>
+					
+					<p>If a peripheral wants to generate an interrupt when the transfer of a buffer is
+					complete, it can test for its -DACKn signal and the EOP signal both being asserted at the
+					same time. When that happens, it means the DMA will not transfer any more information for
+					that peripheral without intervention by the CPU. The peripheral can then assert one of
+					the interrupt signals to get the processors' attention. In the PC architecture, the DMA
+					chip itself is not capable of generating an interrupt. The peripheral and its associated
+					hardware is responsible for generating any interrupt that occurs. Subsequently, it is
+					possible to have a peripheral that uses DMA but does not use interrupts.</p>
+					
+					<p>It is important to understand that although the CPU always releases the bus to the DMA
+					when the DMA makes the request, this action is invisible to both applications and the
+					operating system, except for slight changes in the amount of time the processor takes to
+					execute instructions when the DMA is active. Subsequently, the processor must poll the
+					peripheral, poll the registers in the DMA chip, or receive an interrupt from the
+					peripheral to know for certain when a DMA transfer has completed.</p>
+				</div>
+				
+				<div class="SECT2">
+					<h2 class="SECT2"><a id="AEN3452" name="AEN3452">9.1.2 DMA Page Registers and 16Meg
+							address space limitations</a></h2>
+					
+					<p>You may have noticed earlier that instead of the DMA setting the address lines to
+					0x00123456 as we said earlier, the DMA only set 0x3456. The reason for this takes a bit
+					of explaining.</p>
+					
+					<p>When the original IBM PC was designed, IBM elected to use both DMA and interrupt
+					controller chips that were designed for use with the 8085, an 8-bit processor with an
+					address space of 16 bits (64K). Since the IBM PC supported more than 64K of memory,
+					something had to be done to allow the DMA to read or write memory locations above the 64K
+					mark. What IBM did to solve this problem was to add an external data latch for each DMA
+					channel that holds the upper bits of the address to be read to or written from. Whenever
+					a DMA channel is active, the contents of that latch are written to the address bus and
+					kept there until the DMA operation for the channel ends. IBM called these latches
+					“Page Registers”.</p>
+					
+					<p>So for our example above, the DMA would put the 0x3456 part of the address on the bus,
+					and the Page Register for DMA channel 2 would put 0x0012xxxx on the bus. Together, these
+					two values form the complete address in memory that is to be accessed.</p>
+					
+					<p>Because the Page Register latch is independent of the DMA chip, the area of memory to
+					be read or written must not span a 64K physical boundary. For example, if the DMA
+					accesses memory location 0xffff, after that transfer the DMA will then increment the
+					address register and the DMA will access the next byte at location 0x0000, not 0x10000.
+					The results of letting this happen are probably not intended.</p>
+					
+					<div class="NOTE">
+						<blockquote class="NOTE">
+							<p><b>Note:</b> “Physical” 64K boundaries should not be confused with
+							8086-mode 64K “Segments”, which are created by mathematically adding a
+							segment register with an offset register. Page Registers have no address overlap and are
+							mathematically OR-ed together.</p>
+						</blockquote>
+					</div>
+					
+					<p>To further complicate matters, the external DMA address latches on the PC/AT hold only
+					eight bits, so that gives us 8+16=24 bits, which means that the DMA can only point at
+					memory locations between 0 and 16Meg. For newer computers that allow more than 16Meg of
+					memory, the standard PC-compatible DMA cannot access memory locations above 16Meg.</p>
+					
+					<p>To get around this restriction, operating systems will reserve a RAM buffer in an area
+					below 16Meg that also does not span a physical 64K boundary. Then the DMA will be
+					programmed to transfer data from the peripheral and into that buffer. Once the DMA has
+					moved the data into this buffer, the operating system will then copy the data from the
+					buffer to the address where the data is really supposed to be stored.</p>
+					
+					<p>When writing data from an address above 16Meg to a DMA-based peripheral, the data must
+					be first copied from where it resides into a buffer located below 16Meg, and then the DMA
+					can copy the data from the buffer to the hardware. In FreeBSD, these reserved buffers are
+					called “Bounce Buffers”. In the <span class="TRADEMARK">MS-DOS</span>®
+					world, they are sometimes called “Smart Buffers”.</p>
+					
+					<div class="NOTE">
+						<blockquote class="NOTE">
+							<p><b>Note:</b> A new implementation of the 8237, called the 82374, allows 16 bits of
+							page register to be specified and enables access to the entire 32 bit address space,
+							without the use of bounce buffers.</p>
+						</blockquote>
+					</div>
+				</div>
+				
+				<div class="SECT2">
+					<h2 class="SECT2"><a id="AEN3471" name="AEN3471">9.1.3 DMA Operational Modes and
+							Settings</a></h2>
+					
+					<p>The 8237 DMA can be operated in several modes. The main ones are:</p>
+					
+					<div class="VARIABLELIST">
+						<dl>
+							<dt>Single</dt>
+							
+							<dd>
+							<p>A single byte (or word) is transferred. The DMA must release and re-acquire the bus
+							for each additional byte. This is commonly-used by devices that cannot transfer the
+							entire block of data immediately. The peripheral will request the DMA each time it is
+							ready for another transfer.</p>
+							
+							<p>The standard PC-compatible floppy disk controller (NEC 765) only has a one-byte
+							buffer, so it uses this mode.</p>
+							</dd>
+							
+							<dt>Block/Demand</dt>
+							
+							<dd>
+							<p>Once the DMA acquires the system bus, an entire block of data is transferred, up to a
+							maximum of 64K. If the peripheral needs additional time, it can assert the READY signal
+							to suspend the transfer briefly. READY should not be used excessively, and for slow
+							peripheral transfers, the Single Transfer Mode should be used instead.</p>
+							
+							<p>The difference between Block and Demand is that once a Block transfer is started, it
+							runs until the transfer count reaches zero. DRQ only needs to be asserted until -DACK is
+							asserted. Demand Mode will transfer one more bytes until DRQ is de-asserted, at which
+							point the DMA suspends the transfer and releases the bus back to the CPU. When DRQ is
+							asserted later, the transfer resumes where it was suspended.</p>
+							
+							<p>Older hard disk controllers used Demand Mode until CPU speeds increased to the point
+							that it was more efficient to transfer the data using the CPU, particularly if the memory
+							locations used in the transfer were above the 16Meg mark.</p>
+							</dd>
+							
+							<dt>Cascade</dt>
+							
+							<dd>
+							<p>This mechanism allows a DMA channel to request the bus, but then the attached
+							peripheral device is responsible for placing the addressing information on the bus
+							instead of the DMA. This is also used to implement a technique known as “Bus
+							Mastering”.</p>
+							
+							<p>When a DMA channel in Cascade Mode receives control of the bus, the DMA does not place
+							addresses and I/O control signals on the bus like the DMA normally does when it is
+							active. Instead, the DMA only asserts the -DACK signal for the active DMA channel.</p>
+							
+							<p>At this point it is up to the peripheral connected to that DMA channel to provide
+							address and bus control signals. The peripheral has complete control over the system bus,
+							and can do reads and/or writes to any address below 16Meg. When the peripheral is
+							finished with the bus, it de-asserts the DRQ line, and the DMA controller can then return
+							control to the CPU or to some other DMA channel.</p>
+							
+							<p>Cascade Mode can be used to chain multiple DMA controllers together, and this is
+							exactly what DMA Channel 4 is used for in the PC architecture. When a peripheral requests
+							the bus on DMA channels 0, 1, 2 or 3, the slave DMA controller asserts HLDREQ, but this
+							wire is actually connected to DRQ4 on the primary DMA controller instead of to the CPU.
+							The primary DMA controller, thinking it has work to do on Channel 4, requests the bus
+							from the CPU using HLDREQ signal. Once the CPU grants the bus to the primary DMA
+							controller, -DACK4 is asserted, and that wire is actually connected to the HLDA signal on
+							the slave DMA controller. The slave DMA controller then transfers data for the DMA
+							channel that requested it (0, 1, 2 or 3), or the slave DMA may grant the bus to a
+							peripheral that wants to perform its own bus-mastering, such as a SCSI controller.</p>
+							
+							<p>Because of this wiring arrangement, only DMA channels 0, 1, 2, 3, 5, 6 and 7 are
+							usable with peripherals on PC/AT systems.</p>
+							
+							<div class="NOTE">
+								<blockquote class="NOTE">
+									<p><b>Note:</b> DMA channel 0 was reserved for refresh operations in early IBM PC
+									computers, but is generally available for use by peripherals in modern systems.</p>
+								</blockquote>
+							</div>
+							
+							<p>When a peripheral is performing Bus Mastering, it is important that the peripheral
+							transmit data to or from memory constantly while it holds the system bus. If the
+							peripheral cannot do this, it must release the bus frequently so that the system can
+							perform refresh operations on main memory.</p>
+							
+							<p>The Dynamic RAM used in all PCs for main memory must be accessed frequently to keep
+							the bits stored in the components “charged”. Dynamic RAM essentially consists
+							of millions of capacitors with each one holding one bit of data. These capacitors are
+							charged with power to represent a <tt class="LITERAL">1</tt> or drained to represent a
+							<tt class="LITERAL">0</tt>. Because all capacitors leak, power must be added at regular
+							intervals to keep the <tt class="LITERAL">1</tt> values intact. The RAM chips actually
+							handle the task of pumping power back into all of the appropriate locations in RAM, but
+							they must be told when to do it by the rest of the computer so that the refresh activity
+							will not interfere with the computer wanting to access RAM normally. If the computer is
+							unable to refresh memory, the contents of memory will become corrupted in just a few
+							milliseconds.</p>
+							
+							<p>Since memory read and write cycles “count” as refresh cycles (a dynamic
+							RAM refresh cycle is actually an incomplete memory read cycle), as long as the peripheral
+							controller continues reading or writing data to sequential memory locations, that action
+							will refresh all of memory.</p>
+							
+							<p>Bus-mastering is found in some SCSI host interfaces and other high-performance
+							peripheral controllers.</p>
+							</dd>
+							
+							<dt>Autoinitialize</dt>
+							
+							<dd>
+							<p>This mode causes the DMA to perform Byte, Block or Demand transfers, but when the DMA
+							transfer counter reaches zero, the counter and address are set back to where they were
+							when the DMA channel was originally programmed. This means that as long as the peripheral
+							requests transfers, they will be granted. It is up to the CPU to move new data into the
+							fixed buffer ahead of where the DMA is about to transfer it when doing output operations,
+							and to read new data out of the buffer behind where the DMA is writing when doing input
+							operations.</p>
+							
+							<p>This technique is frequently used on audio devices that have small or no hardware
+							“sample” buffers. There is additional CPU overhead to manage this
+							“circular” buffer, but in some cases this may be the only way to eliminate
+							the latency that occurs when the DMA counter reaches zero and the DMA stops transfers
+							until it is reprogrammed.</p>
+							</dd>
+						</dl>
+					</div>
+				</div>
+				
+				<div class="SECT2">
+					<h2 class="SECT2"><a id="AEN3513" name="AEN3513">9.1.4 Programming the DMA</a></h2>
+					
+					<p>The DMA channel that is to be programmed should always be “masked” before
+					loading any settings. This is because the hardware might unexpectedly assert the DRQ for
+					that channel, and the DMA might respond, even though not all of the parameters have been
+					loaded or updated.</p>
+					
+					<p>Once masked, the host must specify the direction of the transfer (memory-to-I/O or
+					I/O-to-memory), what mode of DMA operation is to be used for the transfer (Single, Block,
+					Demand, Cascade, etc), and finally the address and length of the transfer are loaded. The
+					length that is loaded is one less than the amount you expect the DMA to transfer. The LSB
+					and MSB of the address and length are written to the same 8-bit I/O port, so another port
+					must be written to first to guarantee that the DMA accepts the first byte as the LSB and
+					the second byte as the MSB of the length and address.</p>
+					
+					<p>Then, be sure to update the Page Register, which is external to the DMA and is
+					accessed through a different set of I/O ports.</p>
+					
+					<p>Once all the settings are ready, the DMA channel can be un-masked. That DMA channel is
+					now considered to be “armed”, and will respond when the DRQ line for that
+					channel is asserted.</p>
+					
+					<p>Refer to a hardware data book for precise programming details for the 8237. You will
+					also need to refer to the I/O port map for the PC system, which describes where the DMA
+					and Page Register ports are located. A complete port map table is located below.</p>
+				</div>
+				
+				<div class="SECT2">
+					<h2 class="SECT2"><a id="AEN3522" name="AEN3522">9.1.5 DMA Port Map</a></h2>
+					
+					<p>All systems based on the IBM-PC and PC/AT have the DMA hardware located at the same
+					I/O ports. The complete list is provided below. Ports assigned to DMA Controller #2 are
+					undefined on non-AT designs.</p>
+					
+					<div class="SECT3">
+						<h3 class="SECT3"><a id="AEN3525" name="AEN3525">9.1.5.1 0x00-0x1f DMA Controller #1
+								(Channels 0, 1, 2 and 3)</a></h3>
+						
+						<p>DMA Address and Count Registers</p>
+						
+						<div class="INFORMALTABLE">
+							<a id="AEN3528" name="AEN3528"></a>
+							<table class="CALSTABLE" frame="void" width="100%" border="0">
+								<colgroup><col>
+								<col>
+								<col>
+								</colgroup><tbody>
+									<tr>
+										<td>0x00</td>
+										<td>write</td>
+										<td>Channel 0 starting address</td>
+									</tr>
+									<tr>
+										<td>0x00</td>
+										<td>read</td>
+										<td>Channel 0 current address</td>
+									</tr>
+									<tr>
+										<td>0x01</td>
+										<td>write</td>
+										<td>Channel 0 starting word count</td>
+									</tr>
+									<tr>
+										<td>0x01</td>
+										<td>read</td>
+										<td>Channel 0 remaining word count</td>
+									</tr>
+									<tr>
+										<td>0x02</td>
+										<td>write</td>
+										<td>Channel 1 starting address</td>
+									</tr>
+									<tr>
+										<td>0x02</td>
+										<td>read</td>
+										<td>Channel 1 current address</td>
+									</tr>
+									<tr>
+										<td>0x03</td>
+										<td>write</td>
+										<td>Channel 1 starting word count</td>
+									</tr>
+									<tr>
+										<td>0x03</td>
+										<td>read</td>
+										<td>Channel 1 remaining word count</td>
+									</tr>
+									<tr>
+										<td>0x04</td>
+										<td>write</td>
+										<td>Channel 2 starting address</td>
+									</tr>
+									<tr>
+										<td>0x04</td>
+										<td>read</td>
+										<td>Channel 2 current address</td>
+									</tr>
+									<tr>
+										<td>0x05</td>
+										<td>write</td>
+										<td>Channel 2 starting word count</td>
+									</tr>
+									<tr>
+										<td>0x05</td>
+										<td>read</td>
+										<td>Channel 2 remaining word count</td>
+									</tr>
+									<tr>
+										<td>0x06</td>
+										<td>write</td>
+										<td>Channel 3 starting address</td>
+									</tr>
+									<tr>
+										<td>0x06</td>
+										<td>read</td>
+										<td>Channel 3 current address</td>
+									</tr>
+									<tr>
+										<td>0x07</td>
+										<td>write</td>
+										<td>Channel 3 starting word count</td>
+									</tr>
+									<tr>
+										<td>0x07</td>
+										<td>read</td>
+										<td>Channel 3 remaining word count</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+						
+						<p>DMA Command Registers</p>
+						
+						<div class="INFORMALTABLE">
+							<a id="AEN3596" name="AEN3596"></a>
+							<table class="CALSTABLE" frame="void" width="100%" border="0">
+								<colgroup><col>
+								<col>
+								<col>
+								</colgroup><tbody>
+									<tr>
+										<td>0x08</td>
+										<td>write</td>
+										<td>Command Register</td>
+									</tr>
+									<tr>
+										<td>0x08</td>
+										<td>read</td>
+										<td>Status Register</td>
+									</tr>
+									<tr>
+										<td>0x09</td>
+										<td>write</td>
+										<td>Request Register</td>
+									</tr>
+									<tr>
+										<td>0x09</td>
+										<td>read</td>
+										<td>-</td>
+									</tr>
+									<tr>
+										<td>0x0a</td>
+										<td>write</td>
+										<td>Single Mask Register Bit</td>
+									</tr>
+									<tr>
+										<td>0x0a</td>
+										<td>read</td>
+										<td>-</td>
+									</tr>
+									<tr>
+										<td>0x0b</td>
+										<td>write</td>
+										<td>Mode Register</td>
+									</tr>
+									<tr>
+										<td>0x0b</td>
+										<td>read</td>
+										<td>-</td>
+									</tr>
+									<tr>
+										<td>0x0c</td>
+										<td>write</td>
+										<td>Clear LSB/MSB Flip-Flop</td>
+									</tr>
+									<tr>
+										<td>0x0c</td>
+										<td>read</td>
+										<td>-</td>
+									</tr>
+									<tr>
+										<td>0x0d</td>
+										<td>write</td>
+										<td>Master Clear/Reset</td>
+									</tr>
+									<tr>
+										<td>0x0d</td>
+										<td>read</td>
+										<td>Temporary Register (not available on newer versions)</td>
+									</tr>
+									<tr>
+										<td>0x0e</td>
+										<td>write</td>
+										<td>Clear Mask Register</td>
+									</tr>
+									<tr>
+										<td>0x0e</td>
+										<td>read</td>
+										<td>-</td>
+									</tr>
+									<tr>
+										<td>0x0f</td>
+										<td>write</td>
+										<td>Write All Mask Register Bits</td>
+									</tr>
+									<tr>
+										<td>0x0f</td>
+										<td>read</td>
+										<td>Read All Mask Register Bits (only in <span class="TRADEMARK">Intel</span> 82374)</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+					
+					<div class="SECT3">
+						<h3 class="SECT3"><a id="AEN3664" name="AEN3664">9.1.5.2 0xc0-0xdf DMA Controller #2
+								(Channels 4, 5, 6 and 7)</a></h3>
+						
+						<p>DMA Address and Count Registers</p>
+						
+						<div class="INFORMALTABLE">
+							<a id="AEN3667" name="AEN3667"></a>
+							<table class="CALSTABLE" frame="void" width="100%" border="0">
+								<colgroup><col>
+								<col>
+								<col>
+								</colgroup><tbody>
+									<tr>
+										<td>0xc0</td>
+										<td>write</td>
+										<td>Channel 4 starting address</td>
+									</tr>
+									<tr>
+										<td>0xc0</td>
+										<td>read</td>
+										<td>Channel 4 current address</td>
+									</tr>
+									<tr>
+										<td>0xc2</td>
+										<td>write</td>
+										<td>Channel 4 starting word count</td>
+									</tr>
+									<tr>
+										<td>0xc2</td>
+										<td>read</td>
+										<td>Channel 4 remaining word count</td>
+									</tr>
+									<tr>
+										<td>0xc4</td>
+										<td>write</td>
+										<td>Channel 5 starting address</td>
+									</tr>
+									<tr>
+										<td>0xc4</td>
+										<td>read</td>
+										<td>Channel 5 current address</td>
+									</tr>
+									<tr>
+										<td>0xc6</td>
+										<td>write</td>
+										<td>Channel 5 starting word count</td>
+									</tr>
+									<tr>
+										<td>0xc6</td>
+										<td>read</td>
+										<td>Channel 5 remaining word count</td>
+									</tr>
+									<tr>
+										<td>0xc8</td>
+										<td>write</td>
+										<td>Channel 6 starting address</td>
+									</tr>
+									<tr>
+										<td>0xc8</td>
+										<td>read</td>
+										<td>Channel 6 current address</td>
+									</tr>
+									<tr>
+										<td>0xca</td>
+										<td>write</td>
+										<td>Channel 6 starting word count</td>
+									</tr>
+									<tr>
+										<td>0xca</td>
+										<td>read</td>
+										<td>Channel 6 remaining word count</td>
+									</tr>
+									<tr>
+										<td>0xcc</td>
+										<td>write</td>
+										<td>Channel 7 starting address</td>
+									</tr>
+									<tr>
+										<td>0xcc</td>
+										<td>read</td>
+										<td>Channel 7 current address</td>
+									</tr>
+									<tr>
+										<td>0xce</td>
+										<td>write</td>
+										<td>Channel 7 starting word count</td>
+									</tr>
+									<tr>
+										<td>0xce</td>
+										<td>read</td>
+										<td>Channel 7 remaining word count</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+						
+						<p>DMA Command Registers</p>
+						
+						<div class="INFORMALTABLE">
+							<a id="AEN3735" name="AEN3735"></a>
+							<table class="CALSTABLE" frame="void" width="100%" border="0">
+								<colgroup><col>
+								<col>
+								<col>
+								</colgroup><tbody>
+									<tr>
+										<td>0xd0</td>
+										<td>write</td>
+										<td>Command Register</td>
+									</tr>
+									<tr>
+										<td>0xd0</td>
+										<td>read</td>
+										<td>Status Register</td>
+									</tr>
+									<tr>
+										<td>0xd2</td>
+										<td>write</td>
+										<td>Request Register</td>
+									</tr>
+									<tr>
+										<td>0xd2</td>
+										<td>read</td>
+										<td>-</td>
+									</tr>
+									<tr>
+										<td>0xd4</td>
+										<td>write</td>
+										<td>Single Mask Register Bit</td>
+									</tr>
+									<tr>
+										<td>0xd4</td>
+										<td>read</td>
+										<td>-</td>
+									</tr>
+									<tr>
+										<td>0xd6</td>
+										<td>write</td>
+										<td>Mode Register</td>
+									</tr>
+									<tr>
+										<td>0xd6</td>
+										<td>read</td>
+										<td>-</td>
+									</tr>
+									<tr>
+										<td>0xd8</td>
+										<td>write</td>
+										<td>Clear LSB/MSB Flip-Flop</td>
+									</tr>
+									<tr>
+										<td>0xd8</td>
+										<td>read</td>
+										<td>-</td>
+									</tr>
+									<tr>
+										<td>0xda</td>
+										<td>write</td>
+										<td>Master Clear/Reset</td>
+									</tr>
+									<tr>
+										<td>0xda</td>
+										<td>read</td>
+										<td>Temporary Register (not present in <span class="TRADEMARK">Intel</span> 82374)</td>
+									</tr>
+									<tr>
+										<td>0xdc</td>
+										<td>write</td>
+										<td>Clear Mask Register</td>
+									</tr>
+									<tr>
+										<td>0xdc</td>
+										<td>read</td>
+										<td>-</td>
+									</tr>
+									<tr>
+										<td>0xde</td>
+										<td>write</td>
+										<td>Write All Mask Register Bits</td>
+									</tr>
+									<tr>
+										<td>0xdf</td>
+										<td>read</td>
+										<td>Read All Mask Register Bits (only in <span class="TRADEMARK">Intel</span> 82374)</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+					
+					<div class="SECT3">
+						<h3 class="SECT3"><a id="AEN3804" name="AEN3804">9.1.5.3 0x80-0x9f DMA Page
+								Registers</a></h3>
+						
+						<div class="INFORMALTABLE">
+							<a id="AEN3806" name="AEN3806"></a>
+							<table class="CALSTABLE" frame="void" width="100%" border="0">
+								<colgroup><col>
+								<col>
+								<col>
+								</colgroup><tbody>
+									<tr>
+										<td>0x87</td>
+										<td>r/w</td>
+										<td>Channel 0 Low byte (23-16) page Register</td>
+									</tr>
+									<tr>
+										<td>0x83</td>
+										<td>r/w</td>
+										<td>Channel 1 Low byte (23-16) page Register</td>
+									</tr>
+									<tr>
+										<td>0x81</td>
+										<td>r/w</td>
+										<td>Channel 2 Low byte (23-16) page Register</td>
+									</tr>
+									<tr>
+										<td>0x82</td>
+										<td>r/w</td>
+										<td>Channel 3 Low byte (23-16) page Register</td>
+									</tr>
+									<tr>
+										<td>0x8b</td>
+										<td>r/w</td>
+										<td>Channel 5 Low byte (23-16) page Register</td>
+									</tr>
+									<tr>
+										<td>0x89</td>
+										<td>r/w</td>
+										<td>Channel 6 Low byte (23-16) page Register</td>
+									</tr>
+									<tr>
+										<td>0x8a</td>
+										<td>r/w</td>
+										<td>Channel 7 Low byte (23-16) page Register</td>
+									</tr>
+									<tr>
+										<td>0x8f</td>
+										<td>r/w</td>
+										<td>Low byte page Refresh</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+					
+					<div class="SECT3">
+						<h3 class="SECT3"><a id="AEN3841" name="AEN3841">9.1.5.4 0x400-0x4ff 82374 Enhanced DMA
+								Registers</a></h3>
+						
+						<p>The <span class="TRADEMARK">Intel</span> 82374 EISA System Component (ESC) was
+						introduced in early 1996 and includes a DMA controller that provides a superset of 8237
+						functionality as well as other PC-compatible core peripheral components in a single
+						package. This chip is targeted at both EISA and PCI platforms, and provides modern DMA
+						features like scatter-gather, ring buffers as well as direct access by the system DMA to
+						all 32 bits of address space.</p>
+						
+						<p>If these features are used, code should also be included to provide similar
+						functionality in the previous 16 years worth of PC-compatible computers. For
+						compatibility reasons, some of the 82374 registers must be programmed <span class="emphasis"><i class="EMPHASIS">after</i></span> programming the traditional 8237
+						registers for each transfer. Writing to a traditional 8237 register forces the contents
+						of some of the 82374 enhanced registers to zero to provide backward software
+						compatibility.</p>
+						
+						<div class="INFORMALTABLE">
+							<a id="AEN3847" name="AEN3847"></a>
+							<table class="CALSTABLE" frame="void" width="100%" border="0">
+								<colgroup><col>
+								<col>
+								<col>
+								</colgroup><tbody>
+									<tr>
+										<td>0x401</td>
+										<td>r/w</td>
+										<td>Channel 0 High byte (bits 23-16) word count</td>
+									</tr>
+									<tr>
+										<td>0x403</td>
+										<td>r/w</td>
+										<td>Channel 1 High byte (bits 23-16) word count</td>
+									</tr>
+									<tr>
+										<td>0x405</td>
+										<td>r/w</td>
+										<td>Channel 2 High byte (bits 23-16) word count</td>
+									</tr>
+									<tr>
+										<td>0x407</td>
+										<td>r/w</td>
+										<td>Channel 3 High byte (bits 23-16) word count</td>
+									</tr>
+									<tr>
+										<td>0x4c6</td>
+										<td>r/w</td>
+										<td>Channel 5 High byte (bits 23-16) word count</td>
+									</tr>
+									<tr>
+										<td>0x4ca</td>
+										<td>r/w</td>
+										<td>Channel 6 High byte (bits 23-16) word count</td>
+									</tr>
+									<tr>
+										<td>0x4ce</td>
+										<td>r/w</td>
+										<td>Channel 7 High byte (bits 23-16) word count</td>
+									</tr>
+									<tr>
+										<td>0x487</td>
+										<td>r/w</td>
+										<td>Channel 0 High byte (bits 31-24) page Register</td>
+									</tr>
+									<tr>
+										<td>0x483</td>
+										<td>r/w</td>
+										<td>Channel 1 High byte (bits 31-24) page Register</td>
+									</tr>
+									<tr>
+										<td>0x481</td>
+										<td>r/w</td>
+										<td>Channel 2 High byte (bits 31-24) page Register</td>
+									</tr>
+									<tr>
+										<td>0x482</td>
+										<td>r/w</td>
+										<td>Channel 3 High byte (bits 31-24) page Register</td>
+									</tr>
+									<tr>
+										<td>0x48b</td>
+										<td>r/w</td>
+										<td>Channel 5 High byte (bits 31-24) page Register</td>
+									</tr>
+									<tr>
+										<td>0x489</td>
+										<td>r/w</td>
+										<td>Channel 6 High byte (bits 31-24) page Register</td>
+									</tr>
+									<tr>
+										<td>0x48a</td>
+										<td>r/w</td>
+										<td>Channel 6 High byte (bits 31-24) page Register</td>
+									</tr>
+									<tr>
+										<td>0x48f</td>
+										<td>r/w</td>
+										<td>High byte page Refresh</td>
+									</tr>
+									<tr>
+										<td>0x4e0</td>
+										<td>r/w</td>
+										<td>Channel 0 Stop Register (bits 7-2)</td>
+									</tr>
+									<tr>
+										<td>0x4e1</td>
+										<td>r/w</td>
+										<td>Channel 0 Stop Register (bits 15-8)</td>
+									</tr>
+									<tr>
+										<td>0x4e2</td>
+										<td>r/w</td>
+										<td>Channel 0 Stop Register (bits 23-16)</td>
+									</tr>
+									<tr>
+										<td>0x4e4</td>
+										<td>r/w</td>
+										<td>Channel 1 Stop Register (bits 7-2)</td>
+									</tr>
+									<tr>
+										<td>0x4e5</td>
+										<td>r/w</td>
+										<td>Channel 1 Stop Register (bits 15-8)</td>
+									</tr>
+									<tr>
+										<td>0x4e6</td>
+										<td>r/w</td>
+										<td>Channel 1 Stop Register (bits 23-16)</td>
+									</tr>
+									<tr>
+										<td>0x4e8</td>
+										<td>r/w</td>
+										<td>Channel 2 Stop Register (bits 7-2)</td>
+									</tr>
+									<tr>
+										<td>0x4e9</td>
+										<td>r/w</td>
+										<td>Channel 2 Stop Register (bits 15-8)</td>
+									</tr>
+									<tr>
+										<td>0x4ea</td>
+										<td>r/w</td>
+										<td>Channel 2 Stop Register (bits 23-16)</td>
+									</tr>
+									<tr>
+										<td>0x4ec</td>
+										<td>r/w</td>
+										<td>Channel 3 Stop Register (bits 7-2)</td>
+									</tr>
+									<tr>
+										<td>0x4ed</td>
+										<td>r/w</td>
+										<td>Channel 3 Stop Register (bits 15-8)</td>
+									</tr>
+									<tr>
+										<td>0x4ee</td>
+										<td>r/w</td>
+										<td>Channel 3 Stop Register (bits 23-16)</td>
+									</tr>
+									<tr>
+										<td>0x4f4</td>
+										<td>r/w</td>
+										<td>Channel 5 Stop Register (bits 7-2)</td>
+									</tr>
+									<tr>
+										<td>0x4f5</td>
+										<td>r/w</td>
+										<td>Channel 5 Stop Register (bits 15-8)</td>
+									</tr>
+									<tr>
+										<td>0x4f6</td>
+										<td>r/w</td>
+										<td>Channel 5 Stop Register (bits 23-16)</td>
+									</tr>
+									<tr>
+										<td>0x4f8</td>
+										<td>r/w</td>
+										<td>Channel 6 Stop Register (bits 7-2)</td>
+									</tr>
+									<tr>
+										<td>0x4f9</td>
+										<td>r/w</td>
+										<td>Channel 6 Stop Register (bits 15-8)</td>
+									</tr>
+									<tr>
+										<td>0x4fa</td>
+										<td>r/w</td>
+										<td>Channel 6 Stop Register (bits 23-16)</td>
+									</tr>
+									<tr>
+										<td>0x4fc</td>
+										<td>r/w</td>
+										<td>Channel 7 Stop Register (bits 7-2)</td>
+									</tr>
+									<tr>
+										<td>0x4fd</td>
+										<td>r/w</td>
+										<td>Channel 7 Stop Register (bits 15-8)</td>
+									</tr>
+									<tr>
+										<td>0x4fe</td>
+										<td>r/w</td>
+										<td>Channel 7 Stop Register (bits 23-16)</td>
+									</tr>
+									<tr>
+										<td>0x40a</td>
+										<td>write</td>
+										<td>Channels 0-3 Chaining Mode Register</td>
+									</tr>
+									<tr>
+										<td>0x40a</td>
+										<td>read</td>
+										<td>Channel Interrupt Status Register</td>
+									</tr>
+									<tr>
+										<td>0x4d4</td>
+										<td>write</td>
+										<td>Channels 4-7 Chaining Mode Register</td>
+									</tr>
+									<tr>
+										<td>0x4d4</td>
+										<td>read</td>
+										<td>Chaining Mode Status</td>
+									</tr>
+									<tr>
+										<td>0x40c</td>
+										<td>read</td>
+										<td>Chain Buffer Expiration Control Register</td>
+									</tr>
+									<tr>
+										<td>0x410</td>
+										<td>write</td>
+										<td>Channel 0 Scatter-Gather Command Register</td>
+									</tr>
+									<tr>
+										<td>0x411</td>
+										<td>write</td>
+										<td>Channel 1 Scatter-Gather Command Register</td>
+									</tr>
+									<tr>
+										<td>0x412</td>
+										<td>write</td>
+										<td>Channel 2 Scatter-Gather Command Register</td>
+									</tr>
+									<tr>
+										<td>0x413</td>
+										<td>write</td>
+										<td>Channel 3 Scatter-Gather Command Register</td>
+									</tr>
+									<tr>
+										<td>0x415</td>
+										<td>write</td>
+										<td>Channel 5 Scatter-Gather Command Register</td>
+									</tr>
+									<tr>
+										<td>0x416</td>
+										<td>write</td>
+										<td>Channel 6 Scatter-Gather Command Register</td>
+									</tr>
+									<tr>
+										<td>0x417</td>
+										<td>write</td>
+										<td>Channel 7 Scatter-Gather Command Register</td>
+									</tr>
+									<tr>
+										<td>0x418</td>
+										<td>read</td>
+										<td>Channel 0 Scatter-Gather Status Register</td>
+									</tr>
+									<tr>
+										<td>0x419</td>
+										<td>read</td>
+										<td>Channel 1 Scatter-Gather Status Register</td>
+									</tr>
+									<tr>
+										<td>0x41a</td>
+										<td>read</td>
+										<td>Channel 2 Scatter-Gather Status Register</td>
+									</tr>
+									<tr>
+										<td>0x41b</td>
+										<td>read</td>
+										<td>Channel 3 Scatter-Gather Status Register</td>
+									</tr>
+									<tr>
+										<td>0x41d</td>
+										<td>read</td>
+										<td>Channel 5 Scatter-Gather Status Register</td>
+									</tr>
+									<tr>
+										<td>0x41e</td>
+										<td>read</td>
+										<td>Channel 5 Scatter-Gather Status Register</td>
+									</tr>
+									<tr>
+										<td>0x41f</td>
+										<td>read</td>
+										<td>Channel 7 Scatter-Gather Status Register</td>
+									</tr>
+									<tr>
+										<td>0x420-0x423</td>
+										<td>r/w</td>
+										<td>Channel 0 Scatter-Gather Descriptor Table Pointer Register</td>
+									</tr>
+									<tr>
+										<td>0x424-0x427</td>
+										<td>r/w</td>
+										<td>Channel 1 Scatter-Gather Descriptor Table Pointer Register</td>
+									</tr>
+									<tr>
+										<td>0x428-0x42b</td>
+										<td>r/w</td>
+										<td>Channel 2 Scatter-Gather Descriptor Table Pointer Register</td>
+									</tr>
+									<tr>
+										<td>0x42c-0x42f</td>
+										<td>r/w</td>
+										<td>Channel 3 Scatter-Gather Descriptor Table Pointer Register</td>
+									</tr>
+									<tr>
+										<td>0x434-0x437</td>
+										<td>r/w</td>
+										<td>Channel 5 Scatter-Gather Descriptor Table Pointer Register</td>
+									</tr>
+									<tr>
+										<td>0x438-0x43b</td>
+										<td>r/w</td>
+										<td>Channel 6 Scatter-Gather Descriptor Table Pointer Register</td>
+									</tr>
+									<tr>
+										<td>0x43c-0x43f</td>
+										<td>r/w</td>
+										<td>Channel 7 Scatter-Gather Descriptor Table Pointer Register</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="NAVFOOTER">
+			<hr width="100%" align="left">
+			<table summary="Footer navigation table" width="100%" cellspacing="0" cellpadding="0" border="0"><tbody>
+					<tr>
+						<td width="33%" valign="top" align="left"><a href="http://www.freebsd.org/doc/en/books/developers-handbook/kernel.html" accesskey="P">Prev</a></td>
+						<td width="34%" valign="top" align="center"><a href="http://www.freebsd.org/doc/en/books/developers-handbook/index.html" accesskey="H">Home</a></td>
+						<td width="33%" valign="top" align="right"><a href="http://www.freebsd.org/doc/en/books/developers-handbook/kernelbuild.html" accesskey="N">Next</a></td>
+					</tr>
+					<tr>
+						<td width="33%" valign="top" align="left">Kernel</td>
+						<td width="34%" valign="top" align="center"><a href="http://www.freebsd.org/doc/en/books/developers-handbook/kernel.html" accesskey="U">Up</a></td>
+						<td width="33%" valign="top" align="right">Building and Installing a FreeBSD Kernel</td>
+					</tr>
+			</tbody></table>
+		</div>
+		
+		<p align="center"><small>This, and other documents, can be downloaded from <a href="ftp://ftp.freebsd.org/pub/FreeBSD/doc/">ftp://ftp.FreeBSD.org/pub/FreeBSD/doc/</a>.</small></p>
+		
+		<p align="center"><small>For questions about FreeBSD, read the <a href="http://www.freebsd.org/docs.html">documentation</a> before contacting &lt;<a href="mailto:questions@FreeBSD.org">questions@FreeBSD.org</a>&gt;.<br>
+			For questions about this documentation, e-mail &lt;<a href="mailto:doc@FreeBSD.org">doc@FreeBSD.org</a>&gt;.</small></p>
+	
+
+</body></html>
