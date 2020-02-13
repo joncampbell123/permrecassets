@@ -1,0 +1,9 @@
+#!/bin/bash
+tool=`which html-text`
+if [ -z "$tool" ]; then echo "This tool $0 requires html-text"; exit 1; fi
+
+infile="$1"
+if [ -z "$infile" ]; then echo "Please specify input file"; exit 1; fi
+
+"$tool" "$infile" | text-dictionary -
+
