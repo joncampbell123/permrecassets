@@ -76,6 +76,9 @@ string getTextBODY(htmlHeader &header,xmlNodePtr node,xmlDocPtr doc) {
         else if (!xmlStrcmp(node->name,(const xmlChar*)"div")) {
             ret += "\n" + getTextBODY(header,node->children,doc) + "\n";
         }
+        else if (!xmlStrcmp(node->name,(const xmlChar*)"address")) { /* "Computer Science 314 - The 8237 DMA Controller (2020-02-13 5_41_26 PM).html" nonstd */
+            ret += "\n" + getTextBODY(header,node->children,doc) + "\n";
+        }
         else if (!xmlStrcmp(node->name,(const xmlChar*)"h1") ||
                  !xmlStrcmp(node->name,(const xmlChar*)"h2") ||
                  !xmlStrcmp(node->name,(const xmlChar*)"h3") ||
