@@ -70,15 +70,38 @@ string getTextBODY(htmlHeader &header,xmlNodePtr node,xmlDocPtr doc) {
         else if (!xmlStrcmp(node->name,(const xmlChar*)"pre")) {
             ret += "\n" + getTextBODY(header,node->children,doc) + "\n";
         }
+        else if (!xmlStrcmp(node->name,(const xmlChar*)"code")) {
+            ret += "\n" + getTextBODY(header,node->children,doc) + "\n";
+        }
+        else if (!xmlStrcmp(node->name,(const xmlChar*)"div")) {
+            ret += "\n" + getTextBODY(header,node->children,doc) + "\n";
+        }
         else if (!xmlStrcmp(node->name,(const xmlChar*)"h1") ||
                  !xmlStrcmp(node->name,(const xmlChar*)"h2") ||
-                 !xmlStrcmp(node->name,(const xmlChar*)"h3")) {
+                 !xmlStrcmp(node->name,(const xmlChar*)"h3") ||
+                 !xmlStrcmp(node->name,(const xmlChar*)"h4") ||
+                 !xmlStrcmp(node->name,(const xmlChar*)"h5")) {
             ret += "\t" + getTextBODY(header,node->children,doc) + "\n\n";
         }
         else if (!xmlStrcmp(node->name,(const xmlChar*)"br")) {
             ret += "\n";
         }
+        else if (!xmlStrcmp(node->name,(const xmlChar*)"hr")) {
+            ret += "\n";
+        }
+        else if (!xmlStrcmp(node->name,(const xmlChar*)"a")) {
+            ret += " " + getTextBODY(header,node->children,doc) + " ";
+        }
         else if (!xmlStrcmp(node->name,(const xmlChar*)"tt")) {
+            ret += " " + getTextBODY(header,node->children,doc) + " ";
+        }
+        else if (!xmlStrcmp(node->name,(const xmlChar*)"b")) {
+            ret += " " + getTextBODY(header,node->children,doc) + " ";
+        }
+        else if (!xmlStrcmp(node->name,(const xmlChar*)"i")) {
+            ret += " " + getTextBODY(header,node->children,doc) + " ";
+        }
+        else if (!xmlStrcmp(node->name,(const xmlChar*)"span")) {
             ret += " " + getTextBODY(header,node->children,doc) + " ";
         }
         else {
