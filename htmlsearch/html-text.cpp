@@ -21,6 +21,8 @@ public:
     bool            dummy = false;
 };
 
+string getTextBODY(htmlHeader &header,xmlNodePtr node,xmlDocPtr doc);
+
 /* node is expected to contain only text */
 string getTextGenericHTML(htmlHeader &header,xmlNodePtr node,xmlDocPtr doc) {
     string ret;
@@ -47,6 +49,27 @@ string getTextHTMLParseHeader(htmlHeader &header,xmlNodePtr node,xmlDocPtr doc) 
     for (;node!=NULL;node=node->next) {
         if (!xmlStrcmp(node->name,(const xmlChar*)"title")) {
             ret += getTextGenericHTML(header,node->children,doc) + "\n";
+        }
+    }
+
+    return ret;
+}
+
+/* parent node UL, node is first UL node child */
+string getTextUL(htmlHeader &header,xmlNodePtr node,xmlDocPtr doc) {
+    string ret;
+
+    (void)header;
+    (void)doc;
+
+    for (;node!=NULL;node=node->next) {
+        if (!xmlStrcmp(node->name,(const xmlChar*)"li")) {
+            ret += "\t* " + getTextBODY(header,node->children,doc) + "\n";
+        }
+        else {
+            ret += getTextBODY(header,node->children,doc) + "\n";
+
+            fprintf(stderr,"WARNING: Unknown HTML tag '%s'\n",node->name);
         }
     }
 
@@ -106,6 +129,9 @@ string getTextBODY(htmlHeader &header,xmlNodePtr node,xmlDocPtr doc) {
         }
         else if (!xmlStrcmp(node->name,(const xmlChar*)"span")) {
             ret += " " + getTextBODY(header,node->children,doc) + " ";
+        }
+        else if (!xmlStrcmp(node->name,(const xmlChar*)"ul")) {
+            ret += "\n" + getTextUL(header,node->children,doc) + "\n";
         }
         else {
             ret += " " + getTextBODY(header,node->children,doc) + " "; // DEFAULT
