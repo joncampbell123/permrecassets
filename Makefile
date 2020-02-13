@@ -1,5 +1,5 @@
 
-SUBDIR=textsearch pdfsearch
+SUBDIR=textsearch pdfsearch htmlsearch
 
 all:
 	for i in $(SUBDIR); do make -C $$i || break; done
