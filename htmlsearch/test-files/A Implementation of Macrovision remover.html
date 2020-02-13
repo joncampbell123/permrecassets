@@ -1,0 +1,192 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>
+A Implementation of Macrovision remover
+</title>
+</head>
+<body>
+<h3>
+A IMPLEMENTATION OF A MACROVISION REMOVER
+</h3>
+<p>
+
+Ref: Macrovision
+<a href="http://www.cs.tut.fi/%7Eap105053/macrovision.html">FAQ</a>
+by Antti Paarlahti who has graduated and left tut domain :-( I don't know
+whether he has new web account.
+</p>
+<p>
+The only remains i have saved from the Antti's pages are
+<a href="http://www.ee.tut.fi/%7Epam/macrovision/macrovision.html">
+here</a>. Don't blaim me about the missing links I have not the files
+missing.
+</p>
+<p>
+Here is a list of working Macrovision pages found by AltaVista
+with search "Macrovision FAQ":
+</p>
+<ul>
+<li>
+<a href="http://www.paranoia.com/%7Efilipg/LINK/F_MacroVision.html">
+  Anttis FAQ V1.2 formatted by Filip M. Gieszczykiewicz</a>
+  </li>
+<li>
+<a href="http://www.ee.ualberta.ca/%7Echarro/cookbook/video/MacroVision.doc">
+  Information from Dan Charrois' Web archive</a>
+  </li>
+<li>
+<a href="http://www.itacs.uow.edu.au/people/adam/mv_faq.html">Version
+  1.2! stored (edited?) by Adam Barclay</a>
+  </li>
+<li>
+<a href="http://www2.dk-online.dk/users/mb/vidstab.html">VideoStabilizer
+  3 (Commercial!)</a>
+  </li>
+<li>
+<a href="http://www.macrovision.com/">Macrovision Corporation</a>
+  </li>
+<li>
+<a href="http://www.macrovision.com/dvd.html">DVD Copy Protection by
+  Macrovision Corporation</a>
+</li>
+</ul>
+<p>
+Elektor Electronics had a construction article at last November (1997) whch
+explained some new features of Macrovision. The article was OK but the cool
+style seems to be: "To avoid discrete ICs and to get more compact
+device we stuffed all logic to XYZ2090LC64-15P which can only be obtained
+by our reader service. The Price is £100. The Figure above has a very
+general block diagram of the devide...". If they only distributed the logic
+source at Web but no! Try the learning by doing there...
+</p>
+<p>
+A list of Macrovision-patents can be found 
+<a href="http://www.kolumbus.fi/pami1/macrovision/macropat.html">here</a>.</p>
+<p>
+
+Disclaimer: This device must not be used against any Copyrighted material.
+In some countries it is permissible to make your own backup copy of
+your own video tape.
+</p>
+<p>
+This implementation is based on the FAQ mentioned above.
+All files with .gz ending are compressed with gzip and are uncompressed
+by command gzip -d (at least in UNIX). After uncompress all .ps files are
+in PostScript format.
+
+</p>
+<h2>Macrovision eliminator V2.3, a implementation</h2>
+Here is a PCB for Anttis design version 2.3.
+The device worked after first switching on and with Anttis recommended
+settings (I tested with PAL only).
+I made a backup copy of my Aladdin film and it was OK.
+The scope revealed though that the working was not so smooth
+as it first looked. Luckily the errors were not visible.
+The problem was the "data slicer" (C9, IC6A, R10, R11, D20, D21) 
+in front of sync separator.
+If anyone knows the circuit I am happy to receive comments on it.
+<p>
+The DIP-switch settings can also be found at Antti's original schematics
+but here they are:
+</p>
+<pre>      ! UPPER ! UPPER ! LOWER
+      ! START !  END  ! START
+------+-------+-------+-------
+PAL   ! 0x05  ! 0x0F  ! 0x126
+------+-------+-------+-------
+NTSC  ! 0x06  ! 0x0E  ! 0xFB
+------+-------+-------+-------
+</pre>
+Switches are encoded in hexadecimal. First decode them to binary.
+Open (OFF) switches are '0'. Closed (ON) switches are '1'.
+Bit 0 is least significant digit and bit 8 is most significant.
+<p>
+I wrote my own schematics only so that it would be identical with my
+PCB design (ports switched etc.).
+</p>
+<p>
+I anyone has experience about this design and SECAM please mail me the
+working dipswitch settings as I have been asked them several times.
+</p>
+<h2>Some comments of V2.3 design</h2>
+I have not time to even verify these comments by myself but here they are
+<br>
+From: Michael Engelbrecht
+<p></p>
+<pre> I have built your/Anttis Videodecoder, which I found on your webpage.
+ It works nicely and I like the design, only I must remark a few mistakes
+ which your should eliminate soon, as many people will be cursing and
+ don't know what to do.
+
+ D9 and D18 must be taken out (or use DIP-switches)
+ D31 is for PAL only (or use DIP-switches)
+
+ IC2c pin 9 must be connected to IC6f pin 13, not pin 12. Or use the last
+ NAND gate as an inverter.
+
+ R1 and R2 are ok, only they consume up to 1.5W producing a lot of heat.
+ Use 330Ohm instead, works fine. Or tell people to take BIG resistors (1.5
+ to 2W). The two transistors could use a heat sink, if the 100Ohms are used.
+
+ Finally, tell people, that a closed DIP-switch is a 1 and an open one a 0.
+</pre>
+<h2>Note for Windows downloaders</h2>
+I keep on receiving complains that my zipped files are corrupt.
+They are not! The reason is somewhere in Windows. Try to save
+the files in binary and with different name e.g. no two dots.
+When managed to solve the problem mail the solution to me so that
+we can help other M$ victims.
+<ul>
+<li>
+<a href="http://www.kolumbus.fi/pami1/macrovision/mv23sch.pdf">Schematic diagram</a> A4 PDF.
+</li>
+<li>
+<a href="http://www.kolumbus.fi/pami1/macrovision/mv23pcb.zip">PCB Layout (WinZipped)</a> in Protel Easyedit 2.06 format.
+	Protel MSDOS freewaren can be downloaded 
+	<a href="http://www.protel.com/sales/download/dos/easytrax.zip">
+	here</a>.
+</li>
+<li>
+<a href="http://www.kolumbus.fi/pami1/macrovision/mv23bom.txt">Parts list</a>
+</li>
+</ul>
+<h3>MACROVISION SEEN BY OSCILLOSCOPE</h3>
+<p>
+
+<img src="A%20Implementation%20of%20Macrovision%20remover_files/compare.gif"><br>
+Figure 1. Comparision of Macrovision versions.</p>
+<p>
+The new system (e.g. Lion King) has also spikes inserted in place
+of colour burst just before vertical sync. These are almost impossible to
+remove with monostables. A line counter and decoder logic is required.
+Note also that the normal LM1881 detects the pseudo sync pulses.</p>
+<p>
+<img src="A%20Implementation%20of%20Macrovision%20remover_files/newspikes.gif"><br>
+Figure 2. Spikes inserted before vertical sync.</p>
+<p>
+<img src="A%20Implementation%20of%20Macrovision%20remover_files/Lion003.gif"><br>
+Figure 3. The group of first five pulses have risen.</p>
+<p>
+
+<img src="A%20Implementation%20of%20Macrovision%20remover_files/Lion002.gif"><br>
+Figure 4. The pulses are lowered.</p>
+<p>
+
+<img src="A%20Implementation%20of%20Macrovision%20remover_files/Lion001.gif"><br>
+Figure 5. All pulses are high.</p>
+<p>
+
+<img src="A%20Implementation%20of%20Macrovision%20remover_files/Lion004.gif"><br>
+Figure 6. As figure 5 but different time scale.</p>
+<p>
+
+</p>
+<address>
+<a href="http://www.iki.fi/pam/">pam(at)iki.fi</a> Updated 2004-12-15
+</address>
+
+
+
+
+</body></html>
