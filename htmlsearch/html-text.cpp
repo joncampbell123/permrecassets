@@ -45,8 +45,7 @@ string getTextHTMLParseHeader(htmlHeader &header,xmlNodePtr node,xmlDocPtr doc) 
     (void)header;
 
     for (;node!=NULL;node=node->next) {
-        if (!xmlStrcmp(node->name,(const xmlChar*)"title") ||
-            !xmlStrcmp(node->name,(const xmlChar*)"title")) {
+        if (!xmlStrcmp(node->name,(const xmlChar*)"title")) {
             ret += getTextGenericHTML(header,node->children,doc) + "\n";
         }
     }
@@ -73,12 +72,10 @@ string getTextHTML(xmlNodePtr node,xmlDocPtr doc) {
     string ret;
 
     for (;node!=NULL;node=node->next) {
-        if (!xmlStrcmp(node->name,(const xmlChar*)"head") ||
-            !xmlStrcmp(node->name,(const xmlChar*)"HEAD")) {
+        if (!xmlStrcmp(node->name,(const xmlChar*)"head")) {
             ret += getTextHTMLParseHeader(header,node->children,doc) + "\n";
         }
-        else if (!xmlStrcmp(node->name,(const xmlChar*)"body") ||
-                 !xmlStrcmp(node->name,(const xmlChar*)"BODY")) {
+        else if (!xmlStrcmp(node->name,(const xmlChar*)"body")) {
             ret += getTextBODY(header,node->children,doc) + "\n";
         }
     }
@@ -113,8 +110,7 @@ int main(int argc,char **argv) {
     xmlNodePtr rootNode = xmlDocGetRootElement(htmlDoc);
     if (rootNode) {
         for (;rootNode!=NULL;rootNode=rootNode->next) {
-            if (!xmlStrcmp(rootNode->name,(const xmlChar*)"html") ||
-                !xmlStrcmp(rootNode->name,(const xmlChar*)"HTML")) {
+            if (!xmlStrcmp(rootNode->name,(const xmlChar*)"html")) {
                 printf("\n%s\n",getTextHTML(rootNode->children,htmlDoc).c_str());
             }
         }
