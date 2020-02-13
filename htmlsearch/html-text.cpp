@@ -94,7 +94,7 @@ string getTextBODY(htmlHeader &header,xmlNodePtr node,xmlDocPtr doc) {
             ret += "\n" + getTextBODY(header,node->children,doc) + "\n";
         }
         else if (!xmlStrcmp(node->name,(const xmlChar*)"code")) {
-            ret += "\n" + getTextBODY(header,node->children,doc) + "\n";
+            ret += " " + getTextBODY(header,node->children,doc) + " ";
         }
         else if (!xmlStrcmp(node->name,(const xmlChar*)"div")) {
             ret += "\n" + getTextBODY(header,node->children,doc) + "\n";
