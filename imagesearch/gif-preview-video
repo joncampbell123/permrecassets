@@ -3,10 +3,10 @@ tool=`which ffmpeg`
 if [ -z "$tool" ]; then echo "This script requires FFMPEG"; fi
 
 file="$1"
-res=640
+res=240
 
 # TODO: Reject GIF if it only has one frame
 
 # assume GIF
-ffmpeg -i "$file" -an -vcodec libx264 -vb 50000 -g 20 -bf 9 -r 4 -vf "scale=width='min($res,iw)':height='min($res,ih)':force_original_aspect_ratio=decrease,pad=width='ceil(iw/2)*2':height='ceil(ih/2)*2':x=0:y=0" -crf 38 -pix_fmt yuv420p -movflags +faststart -y -f mp4 preview.mp4 || exit 1
+ffmpeg -i "$file" -an -vcodec libx264 -vb 50000 -g 20 -bf 9 -r 4 -vf "scale=width='min($res,iw)':height='min($res,ih)':force_original_aspect_ratio=decrease,pad=width='ceil(iw/2)*2':height='ceil(ih/2)*2':x=0:y=0" -crf 45 -pix_fmt yuv420p -movflags +faststart -y -f mp4 preview.mp4 || exit 1
 
