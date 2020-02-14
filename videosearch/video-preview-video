@@ -5,5 +5,5 @@ if [ -z "$tool" ]; then echo "This script requires FFMPEG"; fi
 file="$1"
 res=320
 
-ffmpeg -i "$file" -acodec libfdk_aac -ab 14000 -ac 1 -ar 11025 -vcodec libx264 -vb 40000 -g 20 -bf 9 -r 5 -vf "scale=width='min($res,iw)':height='min($res,ih)':force_original_aspect_ratio=decrease,pad=width='ceil(iw/2)*2':height='ceil(ih/2)*2':x=0:y=0" -crf_max 42 -qmin 34 -qmax 63 -pix_fmt yuv420p -movflags +faststart -y -f mp4 preview.mp4 || exit 1
+ffmpeg -i "$file" -acodec libfdk_aac -ab 14000 -ac 1 -ar 11025 -vcodec libx264 -vb 40000 -g 20 -bf 9 -r 4 -vf "scale=width='min($res,iw)':height='min($res,ih)':force_original_aspect_ratio=decrease,pad=width='ceil(iw/2)*2':height='ceil(ih/2)*2':x=0:y=0" -crf_max 42 -qmin 34 -qmax 63 -pix_fmt yuv420p -movflags +faststart -y -f mp4 preview.mp4 || exit 1
 
