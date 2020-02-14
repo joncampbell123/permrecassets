@@ -3,8 +3,28 @@ tool=`which convert`
 if [ -z "$tool" ]; then echo "This script requires ImageMagick"; fi
 
 file="$1"
+res=800
 
 # redirect STDIN to file because filenames in my archives *might* have leading dashes and ImageMagick does not
 # support the GNU -- trick to disable switch parsing past that point. quote the filename to prevent cases where
 # quotation marks or angle brackets do unexpected things in the shell.
-"$tool" "-""[0]" -resize '640x640>' -quality 20 thumbnail.webp <"$file"
+quality=21
+while [ $(($quality >= 1)) == 1 ]; do
+    "$tool" "-""[0]" -resize "$res"x"$res"'>' -quality $quality thumbnail.webp <"$file" || exit 1
+
+    sz=`stat --format=%s thumbnail.webp`
+#   echo $sz $res
+    if [ $(($sz > 16384)) == 1 ]; then
+        if [ $(($quality > 11)) == 1 ]; then
+            quality=$(($quality - 5))
+        elif [ $(($res > 320)) == 1 ]; then
+            quality=21
+            res=$(($res - 160))
+        else
+            break
+        fi
+    else
+        break
+    fi
+done
+
