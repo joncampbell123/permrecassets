@@ -3,7 +3,7 @@ tool=`which ffmpeg`
 if [ -z "$tool" ]; then echo "This script requires FFMPEG"; fi
 
 file="$1"
-res=320
+res=640
 
-ffmpeg -i "$file" -an -vcodec png -r 1/10 -y thumbnail.%d.png || exit 1
+ffmpeg -i "$file" -an -vcodec png -vf "scale='ih*dar':'ih'" -r 1/10 -y thumbnail.%d.png || exit 1
 
