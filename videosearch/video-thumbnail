@@ -7,3 +7,18 @@ res=640
 
 ffmpeg -i "$file" -an -vcodec png -vf "scale='ih*dar':'ih'" -r 1/10 -y thumbnail.%d.png || exit 1
 
+i=1
+while true; do
+    fname="thumbnail.$i.png"
+    if [ -f "$fname" ]; then
+        image-thumbnail "$fname" || exit 1
+        dname=`echo $fname | sed -e 's/png$/webp/'`
+        if [ "$dname" == "$fname" ]; then echo doh; exit 1; fi
+        mv -v "thumbnail.webp" "$dname" || exit 1
+        rm -f "$fname" || exit 1
+        i=$(($i+1))
+    else
+        break
+    fi
+done
+
