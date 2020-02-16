@@ -7,6 +7,11 @@ res=640
 
 ffmpeg -i "$file" -an -vcodec png -vf "scale='ih*dar':'ih'" -r 1/10 -y thumbnail.%d.png || exit 1
 
+# NTS: Thumbnails at this time are strictly sequentially numbered and do not have
+#      any specific timing and mapping. FFMPEG will not generate thumbnails at
+#      strictly multiples of 10s i.e. 0s, 10s, 20s. Perhaps a future revision of
+#      this system will use a custom program using FFMPEG to generate that, and
+#      then timestamps can include the exact timecode in the filename.
 i=1
 while true; do
     fname="thumbnail.$i.png"
