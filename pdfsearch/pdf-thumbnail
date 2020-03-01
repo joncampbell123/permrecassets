@@ -1,0 +1,14 @@
+#!/bin/bash
+tool=`which convert`
+if [ -z "$tool" ]; then echo "This script requires ImageMagick"; fi
+
+file="$1"
+
+page=0
+while true; do
+    convert -density 144x144 "-[$page]" -background white -flatten tmp.png <"$file" || break
+    pdf-image-thumbnail tmp.png || exit 1
+    mv -vn thumbnail.webp "thumbnail."$(($page+1))".webp" || exit 1
+    page=$(($page+1))
+done
+
