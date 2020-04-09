@@ -38,8 +38,43 @@ if (substr($bin,0,4) eq "RIFF" && substr($bin,8,4) eq "WEBP") {
 # done
 close(T);
 
+# AAC/MP3/MP2 "file" is not reliable at identifying these files, unless the MP3 has an ID3v2 tag.
+# Also in my archive I've mistaken AAC for MP3 and vice versa.
+# Use FFMPEG to identify these files.
+# ffprobe has this nice print_format show_format option too!
+if (!defined($mime_type) && $file =~ m/\.(aac|mp1|mp2|mp3|mpg|mpeg|vob|m1v|m2v|mpeg2|mpeg1)/i) {
+    my $format = undef;
+
+    open(T,"-|","ffprobe","-show_format","-print_format","flat","--",$file) || die "Cannot run ffmpeg";
+    while (my $raw = <T>) {
+        chomp $raw;
+        # format.xxx=value or format.xxx="value"
+        my $i=index($raw,'=');
+        next if $i <= 0;
+        my $name = substr($raw,0,$i);
+        my $value = substr($raw,$i+1);
+
+        if ($name eq "format.format_name") {
+            # NTS: value has quotes i.e "aac" "mp3" etc not aac mp3
+            $value =~ s/\"//g;
+            $format = $value;
+        }
+    }
+    close(T);
+
+    if ($format eq "aac") {
+        $mime_type = "audio/aac";
+    }
+    elsif ($format eq "mp1" || $format eq "mp2" || $format eq "mp3") {
+        $mime_type = "audio/mpeg";
+    }
+    elsif ($format eq "mpeg" || $format eq "mpegvideo") {
+        $mime_type = "video/mpeg";
+    }
+}
+
+# use file tool
 if (!defined($mime_type)) {
-    # use file tool
     open(T,"-|","file","--brief","--mime","--",$file) || die "Cannot run file util";
     my $raw = <T>; chomp $raw;
     close(T);
