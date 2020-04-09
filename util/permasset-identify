@@ -26,6 +26,18 @@ die "$file does not exist" unless ( -f $file || -d $file );
 my $mime_type = undef;
 my $mime_encoding = undef;
 
+# cover for cases the file tool cannot cover
+open(T,"<",$file) || die "Cannot open file";
+binmode(T);
+my $bin;
+read(T,$bin,4096);
+# RIFF:WEBP for WebP files
+if (substr($bin,0,4) eq "RIFF" && substr($bin,8,4) eq "WEBP") {
+    $mime_type = "image/webp";
+}
+# done
+close(T);
+
 if (!defined($mime_type)) {
     # use file tool
     open(T,"-|","file","--brief","--mime","--",$file) || die "Cannot run file util";
