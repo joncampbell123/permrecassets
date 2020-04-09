@@ -1,0 +1,43 @@
+#!/usr/bin/perl
+
+use strict;
+
+my $file = undef;
+
+for (my $i=0;$i < @ARGV;) {
+    my $a = $ARGV[$i++];
+
+    if ($a =~ s/^-+//) {
+        if ($a eq "file") {
+            $file = $ARGV[$i++];
+        }
+        else {
+            die "Unknown switch $a";
+        }
+    }
+    else {
+        die "Unexpected arg";
+    }
+}
+
+die "--file spec required" unless defined($file);
+die "$file does not exist" unless ( -f $file || -d $file );
+
+my $mime_type = undef;
+my $mime_encoding = undef;
+
+open(T,"-|","file","--brief","--mime","--",$file) || die;
+my $raw = <T>; chomp $raw;
+close(T);
+
+# if it cannot identify it will just say "data"
+die "Failed to do any identification" unless $raw ne "";
+
+my @sep = split(/; +/,$raw);
+$mime_type = shift @sep if @sep > 0;
+$mime_encoding = shift @sep if @sep > 0;
+
+die "Failed to obtain MIME type" unless $mime_type ne "";
+
+print "$mime_type\n";
+
