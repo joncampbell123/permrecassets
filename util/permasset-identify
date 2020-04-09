@@ -26,7 +26,7 @@ die "$file does not exist" unless ( -f $file || -d $file );
 my $mime_type = undef;
 my $mime_encoding = undef;
 
-open(T,"-|","file","--brief","--mime","--",$file) || die;
+open(T,"-|","file","--brief","--mime","--",$file) || die "Cannot run file util";
 my $raw = <T>; chomp $raw;
 close(T);
 
