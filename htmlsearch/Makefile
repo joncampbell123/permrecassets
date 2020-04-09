@@ -3,12 +3,12 @@ PROGS=html-text
 CXXFLAGS=-std=c++11 -Wall -Wextra -pedantic `pkg-config libxml-2.0 --cflags`
 LDFLAGS=`pkg-config libxml-2.0 --libs`
 
+all: $(PROGS) $(JSON11)
+
 install: $(PROGS)
 	mkdir -p $(DESTDIR)/usr/bin/
 	cp -v html-text $(DESTDIR)/usr/bin/
 	cp -v html-text-dictionary $(DESTDIR)/usr/bin/
-
-all: $(PROGS) $(JSON11)
 
 clean:
 	rm -f $(PROGS) *.o

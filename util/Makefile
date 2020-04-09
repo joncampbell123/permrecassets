@@ -3,11 +3,11 @@ PROGS=mount-is-readonly
 CXXFLAGS=
 LDFLAGS=
 
+all: $(PROGS)
+
 install: $(PROGS)
 	mkdir -p $(DESTDIR)/usr/bin/
 	cp -v mount-is-readonly $(DESTDIR)/usr/bin/
-
-all: $(PROGS)
 
 clean:
 	rm -f $(PROGS) *.o
