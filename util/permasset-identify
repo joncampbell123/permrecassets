@@ -42,7 +42,7 @@ close(T);
 # Also in my archive I've mistaken AAC for MP3 and vice versa.
 # Use FFMPEG to identify these files.
 # ffprobe has this nice print_format show_format option too!
-if (!defined($mime_type) && $file =~ m/\.(aac|mp1|mp2|mp3|mpg|mpeg|vob|m1v|m2v|mpeg2|mpeg1)/i) {
+if (!defined($mime_type) && $file =~ m/\.(aac|mp1|mp2|mp3|mpg|mpeg|vob|m1v|m2v|mpeg2|mpeg1|ts|mts|m2ts)/i) {
     my $format = undef;
 
     open(T,"-|","ffprobe","-show_format","-print_format","flat","--",$file) || die "Cannot run ffmpeg";
@@ -70,6 +70,9 @@ if (!defined($mime_type) && $file =~ m/\.(aac|mp1|mp2|mp3|mpg|mpeg|vob|m1v|m2v|m
     }
     elsif ($format eq "mpeg" || $format eq "mpegvideo") {
         $mime_type = "video/mpeg";
+    }
+    elsif ($format eq "mpegts") {
+        $mime_type = "video/MP2T";
     }
 }
 
