@@ -26,16 +26,19 @@ die "$file does not exist" unless ( -f $file || -d $file );
 my $mime_type = undef;
 my $mime_encoding = undef;
 
-open(T,"-|","file","--brief","--mime","--",$file) || die "Cannot run file util";
-my $raw = <T>; chomp $raw;
-close(T);
+if (!defined($mime_type)) {
+    # use file tool
+    open(T,"-|","file","--brief","--mime","--",$file) || die "Cannot run file util";
+    my $raw = <T>; chomp $raw;
+    close(T);
 
-# if it cannot identify it will just say "data"
-die "Failed to do any identification" unless $raw ne "";
+    # if it cannot identify it will just say "data"
+    die "Failed to do any identification" unless $raw ne "";
 
-my @sep = split(/; +/,$raw);
-$mime_type = shift @sep if @sep > 0;
-$mime_encoding = shift @sep if @sep > 0;
+    my @sep = split(/; +/,$raw);
+    $mime_type = shift @sep if @sep > 0;
+    $mime_encoding = shift @sep if @sep > 0;
+}
 
 die "Failed to obtain MIME type" unless $mime_type ne "";
 
