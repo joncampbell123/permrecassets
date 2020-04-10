@@ -81,4 +81,9 @@ if ($mime_type eq "text/plain") {
 elsif ($mime_type eq "text/rtf") {
     system("rtf-text-dictionary",$file);
 }
+elsif ($mime_type eq "application/pdf") {
+    system("pdf-text-dictionary",$file);
+    system("pdf-image-thumbnail",$file);
+    system("pdf-thumbnail",$file);
+}
 
