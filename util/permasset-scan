@@ -74,3 +74,8 @@ if ($mime_type =~ m/^video\/(quicktime|mpeg|MP2T|x-msvideo|x-ms-asf)$/i) {
     system("video-preview-video",$file);
 }
 
+# text dictionary
+if ($mime_type eq "text/plain") {
+    system("text-dictionary","-o","dictionary.js","--file",$file);
+}
+
