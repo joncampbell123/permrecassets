@@ -20,6 +20,7 @@
 
 using namespace std;
 
+string              out_file;
 vector<string>      files;
 
 struct WordToken {
@@ -64,6 +65,11 @@ static bool parse_argv(int argc,char **argv) {
             if (!strcmp(a,"h")) {
                 help();
                 return false;
+            }
+            else if (!strcmp(a,"o")) {
+                a = argv[i++];
+                if (a == NULL) return false;
+                out_file = a;
             }
             else if (!strcmp(a,"file")) {
                 a = argv[i++];
@@ -263,7 +269,16 @@ int main(int argc,char **argv) {
         string res;
         json11::Json json = json11::Json::object { {"highest count", double(highest_word_count)}, {"word count", double(words.size())}, {"results", resa} };
         json.dump(res);
-        printf("%s\n",res.c_str());
+
+        if (out_file.empty()) {
+            printf("%s\n",res.c_str());
+        }
+        else {
+            FILE *fp = fopen(out_file.c_str(),"w");
+            if (fp == NULL) return 1;
+            fprintf(fp,"%s\n",res.c_str());
+            fclose(fp);
+        }
     }
 
     return 0;
