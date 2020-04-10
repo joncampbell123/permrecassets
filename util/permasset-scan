@@ -78,4 +78,7 @@ if ($mime_type =~ m/^video\/(quicktime|mpeg|MP2T|x-msvideo|x-ms-asf)$/i) {
 if ($mime_type eq "text/plain") {
     system("text-dictionary","--file",$file);
 }
+elsif ($mime_type eq "text/rtf") {
+    system("rtf-text-dictionary",$file);
+}
 
