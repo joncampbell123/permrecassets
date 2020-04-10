@@ -277,6 +277,7 @@ int main(int argc,char **argv) {
             FILE *fp = fopen(out_file.c_str(),"w");
             if (fp == NULL) return 1;
             fprintf(fp,"%s\n",res.c_str());
+            if (feof(fp) || ferror(fp)) return 1;
             fclose(fp);
         }
     }
