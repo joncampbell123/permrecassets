@@ -5,7 +5,7 @@ if [ -z "$tool" ]; then echo "This script requires FFMPEG"; fi
 file="$1"
 res=640
 
-ffmpeg -i "$file" -an -vcodec png -vf "scale='ih*dar':'ih'" -r 1/10 -y thumbnail.%d.png || exit 1
+ffmpeg -i "$file" -an -vcodec png -vf "yadif=mode=0:parity=auto:deint=interlaced,scale='ih*dar':'ih'" -r 1/10 -y thumbnail.%d.png || exit 1
 
 # NTS: Thumbnails at this time are strictly sequentially numbered and do not have
 #      any specific timing and mapping. FFMPEG will not generate thumbnails at
