@@ -78,7 +78,9 @@ if (!defined($mime_type) && $file =~ m/\.(aac|mp1|mp2|mp3|mpg|mpeg|vob|m1v|m2v|m
     elsif ($format =~ m/^mov,/) { # quicktime based formats list multiple, but mov, is first (HACK)
         $mime_type = "video/quicktime";
     }
-
+    elsif ($format =~ m/^matroska,/) { # unix file can identify webm but not mkv? There's no mime type for MKV?
+        $mime_type = "video/webm";
+    }
 }
 
 # use file tool
