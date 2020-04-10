@@ -20,7 +20,7 @@
 
 using namespace std;
 
-string              out_file;
+string              out_file = "dictionary.js";
 vector<string>      files;
 
 struct WordToken {
@@ -270,7 +270,7 @@ int main(int argc,char **argv) {
         json11::Json json = json11::Json::object { {"highest count", double(highest_word_count)}, {"word count", double(words.size())}, {"results", resa} };
         json.dump(res);
 
-        if (out_file.empty()) {
+        if (out_file.empty() || out_file == "-") {
             printf("%s\n",res.c_str());
         }
         else {
