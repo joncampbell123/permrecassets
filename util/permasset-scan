@@ -80,6 +80,12 @@ elsif ($mime_type =~ m/^audio\/(aac|x-wav|mpeg|x-msvideo|x-ms-asf|quicktime|x-fl
     system("video-preview-video",$file);
     system("video-preview-video-audio-only",$file) unless ( -f "preview.mp4" && ( -s "preview.mp4" > 32 ) );
 }
+# other
+elsif ($mime_type =~ m/^application\/(ogg)$/i) {
+    system("video-thumbnail",$file);
+    system("video-preview-video",$file);
+    system("video-preview-video-audio-only",$file) unless ( -f "preview.mp4" && ( -s "preview.mp4" > 32 ) );
+}
 
 # text dictionary
 if ($mime_type eq "text/plain") {
