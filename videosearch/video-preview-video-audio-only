@@ -5,5 +5,5 @@ if [ -z "$tool" ]; then echo "This script requires FFMPEG"; fi
 file="$1"
 res=320
 
-ffmpeg -i "$file" -acodec libfdk_aac -ab 10000 -profile:a aac_low -ac 1 -ar 8000 -vn -movflags +faststart -y -f mp4 preview.mp4 || exit 1
+ffmpeg -i "$file" -acodec libfdk_aac -ab 10000 -profile:a aac_low -ac 1 -ar 8000 -vn -map_metadata -1 -movflags +faststart -y -f mp4 preview.mp4 || exit 1
 
