@@ -75,7 +75,7 @@ if ($mime_type =~ m/^video\/(quicktime|mpeg|MP2T|x-msvideo|x-ms-asf|x-flv|webm)$
     system("video-preview-video-audio-only",$file) unless ( -f "preview.mp4" && ( -s "preview.mp4" > 32 ) );
 }
 # audio preview
-elsif ($mime_type =~ m/^audio\/(aac|x-wav|mpeg|x-msvideo|x-ms-asf|quicktime|x-flv|webm)$/i) {
+elsif ($mime_type =~ m/^audio\/(aac|x-wav|mpeg|x-msvideo|x-ms-asf|quicktime|x-flv|webm|x-flac)$/i) {
     system("video-thumbnail",$file);
     system("video-preview-video",$file);
     system("video-preview-video-audio-only",$file) unless ( -f "preview.mp4" && ( -s "preview.mp4" > 32 ) );
