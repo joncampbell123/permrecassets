@@ -1,0 +1,34 @@
+#!/usr/bin/perl
+
+use strict;
+
+my $file = undef;
+
+for (my $i=0;$i < @ARGV;) {
+    my $a = $ARGV[$i++];
+
+    if ($a =~ s/^-+//) {
+        if ($a eq "file") {
+            $file = $ARGV[$i++];
+        }
+        else {
+            die "Unknown switch $a";
+        }
+    }
+    else {
+        die "Unexpected arg";
+    }
+}
+
+die "--file spec required" unless defined($file);
+die "$file does not exist" unless ( -f $file || -d $file );
+
+# use the identify tool
+open(T,"-|","permasset-identify","--file",$file) || die "Cannot run identify";
+my $mime_type = <T>; chomp $mime_type;
+close(T);
+
+die "Failed to obtain MIME type" unless $mime_type ne "";
+
+print "$mime_type\n";
+

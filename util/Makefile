@@ -9,6 +9,7 @@ install: $(PROGS)
 	mkdir -p $(DESTDIR)/usr/bin/
 	cp -v mount-is-readonly $(DESTDIR)/usr/bin/
 	cp -v permasset-identify $(DESTDIR)/usr/bin/
+	cp -v permasset-scan $(DESTDIR)/usr/bin/
 
 clean:
 	rm -f $(PROGS) *.o
