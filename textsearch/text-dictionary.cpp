@@ -65,6 +65,11 @@ static bool parse_argv(int argc,char **argv) {
                 help();
                 return false;
             }
+            else if (!strcmp(a,"file")) {
+                a = argv[i++];
+                if (a == NULL) return false;
+                files.push_back(a);
+            }
             else {
                 fprintf(stderr,"Unknown %s\n",a);
                 return false;
