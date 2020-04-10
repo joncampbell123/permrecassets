@@ -86,4 +86,7 @@ elsif ($mime_type eq "application/pdf") {
     system("pdf-image-thumbnail",$file);
     system("pdf-thumbnail",$file);
 }
+elsif ($mime_type eq "text/html") {
+    system("html-text-dictionary",$file);
+}
 
