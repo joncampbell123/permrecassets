@@ -63,3 +63,8 @@ if ($mime_type =~ m/^image\/(gif|png|tiff|webp|jpeg)$/) {
     system("image-thumbnail",$file);
 }
 
+# gif video preview
+if ($mime_type =~ m/^image\/(gif)$/) {
+    system("gif-preview-video",$file);
+}
+
