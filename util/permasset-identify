@@ -43,7 +43,7 @@ close(T);
 # Use FFMPEG to identify these files.
 # ffprobe has this nice print_format show_format option too!
 # QuickTime identification is also unreliable with "file"
-if (!defined($mime_type) && $file =~ m/\.(aac|mp1|mp2|mp3|mpg|mpeg|vob|m1v|m2v|mpeg2|mpeg1|ts|mts|m2ts|mov|qt|mp4|3gp|3g2|m4a)$/i) {
+if (!defined($mime_type) && $file =~ m/\.(aac|mp1|mp2|mp3|mpg|mpeg|vob|m1v|m2v|mpeg2|mpeg1|ts|mts|m2ts|mov|qt|mp4|3gp|3g2|m4a|mkv|webm|mka|flv)$/i) {
     my $format = undef;
 
     open(T,"-|","ffprobe","-show_format","-print_format","flat","--",$file) || die "Cannot run ffmpeg";
