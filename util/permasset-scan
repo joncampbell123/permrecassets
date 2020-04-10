@@ -42,7 +42,19 @@ open(T,"-|","permasset-identify","--file",$file) || die "Cannot run identify";
 my $mime_type = <T>; chomp $mime_type;
 close(T);
 
+# the tool will at least emit application/octet if it doesn't know!
 die "Failed to obtain MIME type" unless $mime_type ne "";
 
-print "$mime_type\n";
+# stat
+#          0    1    2     3      4    5    6     7     8      9      10     11       12
+my @st; # ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,$blksize,$blocks)
+@st = stat($file);
+
+# base info
+open(T,">","fileinfo.flat.txt") || die;
+print T "mimetype=$mime_type\n";
+print T "filesize=$st[7]\n";
+print T "unixmode=0".sprintf("%o",$st[2])."\n";
+print T "hardlinks=$st[3]\n";
+close(T);
 
