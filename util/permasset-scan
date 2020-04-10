@@ -58,3 +58,8 @@ print T "unixmode=0".sprintf("%o",$st[2])."\n";
 print T "hardlinks=$st[3]\n";
 close(T);
 
+# image thumbnails
+if ($mime_type =~ m/^image\/(gif|png|tiff|webp|jpeg)$/) {
+    system("image-thumbnail",$file);
+}
+
