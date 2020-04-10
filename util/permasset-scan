@@ -1,6 +1,9 @@
 #!/usr/bin/perl
 
 use strict;
+use Cwd;
+use Cwd qw(abs_path);
+use File::Spec;
 
 my $file = undef;
 
@@ -22,6 +25,17 @@ for (my $i=0;$i < @ARGV;) {
 
 die "--file spec required" unless defined($file);
 die "$file does not exist" unless ( -f $file || -d $file );
+
+# do NOT allow scanning the file if we're in the same directory.
+# You're supposed to use this tool in a temporary directory or a directory
+# where the gathered data is to reside. The generated filenames could
+# overwrite the file to scan.
+my $pwd = abs_path(getcwd);
+die if (!defined($pwd) || $pwd eq "");
+my @fpt = File::Spec->splitpath($file); # ($vol,$dir,$file)
+die unless @fpt >= 3;
+my $fabs = abs_path($fpt[1]);
+die "Do not run this tool in the same directory as the file to scan" if $pwd eq $fabs;
 
 # use the identify tool
 open(T,"-|","permasset-identify","--file",$file) || die "Cannot run identify";
