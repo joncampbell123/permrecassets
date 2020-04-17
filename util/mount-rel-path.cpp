@@ -95,6 +95,10 @@ bool path_to_prl_inner(const procmount_list &pml,path_rel_label &prl,const char 
     for (size_t mi=0;mi < pml.mounts.size();mi++) {
         const procmount_entry &ent = pml.mounts[mi];
 
+        /* Centos likes to list the root '/' filesystem twice, one as the device, the other as "rootfs", which is unhelpful */
+        if (ent.device == "rootfs")
+            continue;
+
         if (!strncmp(ipath,ent.mountpoint.c_str(),ent.mountpoint.size())) {
             if (ipath_match < ent.mountpoint.size()) {
                 ipath_match = ent.mountpoint.size();
