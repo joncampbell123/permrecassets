@@ -68,7 +68,59 @@ bool procmount_list_read(procmount_list &l) {
     return true;
 }
 
+struct path_rel_label {
+    std::string             abs_path;
+    std::string             fs_label;
+    std::string             mountpoint;
+    std::string             relpath;
+
+    void clear(void) {
+        abs_path.clear();
+        fs_label.clear();
+        mountpoint.clear();
+        relpath.clear();
+    }
+};
+
+bool path_to_prl_inner(const procmount_list &pml,path_rel_label &prl,const char *ipath) {
+    prl.clear();
+    prl.abs_path = ipath;
+
+    size_t ipath_match = 0;
+    const size_t ipath_length = strlen(ipath);
+    for (size_t mi=0;mi < pml.mounts.size();mi++) {
+        const procmount_entry &ent = pml.mounts[mi];
+
+        if (!strncmp(ipath,ent.mountpoint.c_str(),ent.mountpoint.size())) {
+            if (ipath_match < ent.mountpoint.size()) {
+                ipath_match = ent.mountpoint.size();
+                prl.mountpoint = ent.mountpoint;
+                const char *s = ipath + ent.mountpoint.size();
+                assert(s <= (ipath+ipath_length));
+                while (*s == '/') s++;
+                prl.relpath = s;
+            }
+        }
+    }
+
+    return !prl.mountpoint.empty();
+}
+
+bool path_to_prl(const procmount_list &pml,path_rel_label &prl,const char *ipath) {
+    bool res = false;
+    char *ripath = realpath(ipath,NULL);
+    if (ripath == NULL) return false;
+    if (*ripath == '/') res = path_to_prl_inner(pml,prl,ripath);
+    free(ripath);
+    return res;
+}
+
+bool path_to_prl(const procmount_list &pml,path_rel_label &prl,const std::string ipath) {
+    return path_to_prl(pml,prl,ipath.c_str());
+}
+
 int main(int argc,char **argv) {
+    path_rel_label prl;
     procmount_list pml;
     struct statvfs st;
 
@@ -85,6 +137,16 @@ int main(int argc,char **argv) {
             ent.device.c_str(),             ent.mountpoint.c_str(),
             ent.filesystem.c_str(),         ent.options.c_str());
     }
+
+    if (!path_to_prl(pml,prl,argv[1])) {
+        fprintf(stderr,"Unable to map\n");
+        return 1;
+    }
+    printf("Rel of '%s'\n",argv[1]);
+    printf("  abs_path:         '%s'\n",prl.abs_path.c_str());
+    printf("  fs_label:         '%s'\n",prl.fs_label.c_str());
+    printf("  mountpoint:       '%s'\n",prl.mountpoint.c_str());
+    printf("  relpath:          '%s'\n",prl.relpath.c_str());
 
     return 0;
 }
