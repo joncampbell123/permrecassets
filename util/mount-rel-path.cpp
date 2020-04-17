@@ -116,7 +116,7 @@ bool path_to_prl_inner(const procmount_list &pml,path_rel_label &prl,const char 
 
         dir = opendir(basepath);
         if (dir != NULL) {
-            while ((d=readdir(dir)) != NULL && !prl.fs_label.empty()) {
+            while ((d=readdir(dir)) != NULL && prl.fs_label.empty()) {
                 if (d->d_name[0] == '.') continue;
                 const std::string path = std::string(basepath) + "/" + d->d_name;
                 char *rpath = realpath(path.c_str(),NULL);
