@@ -13,22 +13,10 @@
 #include <string>
 #include <vector>
 
+#include "lib_procmount.h"
+#include "lib_path_rel_label.h"
+
 using namespace std;
-
-struct procmount_entry {
-    std::string         device;
-    std::string         mountpoint;
-    std::string         filesystem;
-    std::string         options;
-};
-
-struct procmount_list {
-    std::vector<procmount_entry>    mounts;
-
-    void clear(void) {
-        mounts.clear();
-    }
-};
 
 bool procmount_list_read(procmount_list &l) {
     static const int field_max = 6;
@@ -68,22 +56,6 @@ bool procmount_list_read(procmount_list &l) {
 
     return true;
 }
-
-struct path_rel_label {
-    std::string             device;
-    std::string             abs_path;
-    std::string             fs_label;
-    std::string             mountpoint;
-    std::string             relpath;
-
-    void clear(void) {
-        device.clear();
-        abs_path.clear();
-        fs_label.clear();
-        mountpoint.clear();
-        relpath.clear();
-    }
-};
 
 bool path_to_prl_inner(const procmount_list &pml,path_rel_label &prl,const char *ipath) {
     prl.clear();
