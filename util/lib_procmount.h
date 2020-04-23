@@ -20,5 +20,7 @@ struct procmount_list {
     }
 };
 
+bool procmount_list_read(procmount_list &l);
+
 #endif /* UTIL_LIB_PROCMOUNT_H */
 
