@@ -1,17 +1,6 @@
 
 #include <assert.h>
-#include <dirent.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/statvfs.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <string.h>
 #include <stdio.h>
-#include <fcntl.h>
-
-#include <string>
-#include <vector>
 
 #include "lib_procmount.h"
 #include "lib_path_rel_label.h"
@@ -21,7 +10,6 @@ using namespace std;
 int main(int argc,char **argv) {
     path_rel_label prl;
     procmount_list pml;
-    struct statvfs st;
 
     if (argc < 2) {
         fprintf(stderr,"Specify location\n");
