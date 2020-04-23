@@ -20,5 +20,8 @@ struct path_rel_label {
     }
 };
 
+bool path_to_prl(const procmount_list &pml,path_rel_label &prl,const char *ipath);
+bool path_to_prl(const procmount_list &pml,path_rel_label &prl,const std::string ipath);
+ 
 #endif /* UTIL_LIB_PATH_REL_LABEL_H */
 

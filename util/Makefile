@@ -17,7 +17,9 @@ clean:
 
 lib_procmount.o: lib_procmount.cpp
 	g++ $(CXXFLAGS) -c -o $@ $^
-libpermrecassetutil.a: lib_procmount.o
+lib_path_rel_label.o: lib_path_rel_label.cpp
+	g++ $(CXXFLAGS) -c -o $@ $^
+libpermrecassetutil.a: lib_procmount.o lib_path_rel_label.o
 	rm -f $@
 	ar r $@ $^
 
