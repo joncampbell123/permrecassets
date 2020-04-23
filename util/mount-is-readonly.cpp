@@ -1,17 +1,9 @@
 
 #include <sys/types.h>
-#include <sys/stat.h>
 #include <sys/statvfs.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <string.h>
 #include <stdio.h>
-#include <fcntl.h>
-
-#include <string>
 
 using namespace std;
-
 
 int main(int argc,char **argv) {
     struct statvfs st;
