@@ -2,6 +2,10 @@
 #ifndef UTIL_LIB_PATH_REL_LABEL_H
 #define UTIL_LIB_PATH_REL_LABEL_H
 
+# ifndef UTIL_LIB_PROCMOUNT_H
+#  error Include util/lib_procmount.h first
+# endif
+
 #include <string>
 
 struct path_rel_label {
