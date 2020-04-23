@@ -18,7 +18,7 @@
 
 using namespace std;
 
-bool path_to_prl_inner(const procmount_list &pml,path_rel_label &prl,const char *ipath) {
+static bool path_to_prl_inner(const procmount_list &pml,path_rel_label &prl,const char *ipath) {
     prl.clear();
     prl.abs_path = ipath;
 
