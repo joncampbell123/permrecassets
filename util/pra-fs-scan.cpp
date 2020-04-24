@@ -142,7 +142,7 @@ int main(int argc,char **argv) {
                 return 1;
             }
 
-            /* updates child_node.node_id, which becomes the parent_node */
+            /* updates child_node.node_id, which becomes the parent_node going forward */
             parent_node = child_node;
         }
     }
