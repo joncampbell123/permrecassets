@@ -13,6 +13,26 @@ using namespace std;
 
 const prluuid prl_zero_node = { 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0 };
 
+typedef std::vector<uint8_t> prl_blob;
+
+/* instead of passing a million parameters for each part, pass a struct instead.
+ * addition of fields is just add a new struct member and recompile away. */
+struct prl_node_entry {
+    prluuid         node_id;
+    prluuid         parent_node;
+    std::string     name;
+    prl_blob        real_name;
+    std::string     name_charset;
+    uint64_t        size;
+    unsigned int    type;
+    std::string     mime_string;
+    std::string     content_encoding;
+    unsigned int    flags;
+
+    prl_node_entry() : size(0),type(0),flags(0) { }
+    ~prl_node_entry() { }
+};
+
 int main(int argc,char **argv) {
     path_rel_label prl;
     procmount_list pml;
