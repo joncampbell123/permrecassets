@@ -1,4 +1,4 @@
-PROGS=mount-is-readonly mount-rel-path
+PROGS=mount-is-readonly mount-rel-path pra-fs-scan
 
 CXXFLAGS=
 LDFLAGS=
@@ -11,6 +11,7 @@ install: $(PROGS)
 	cp -v mount-is-readonly $(DESTDIR)/usr/bin/
 	cp -v permasset-identify $(DESTDIR)/usr/bin/
 	cp -v permasset-scan $(DESTDIR)/usr/bin/
+	cp -v pra-fs-scan $(DESTDIR)/usr/bin/
 
 clean:
 	rm -f $(PROGS) *.o *.a
@@ -22,6 +23,11 @@ lib_path_rel_label.o: lib_path_rel_label.cpp
 libpermrecassetutil.a: lib_procmount.o lib_path_rel_label.o
 	rm -f $@
 	ar r $@ $^
+
+pra-fs-scan: pra-fs-scan.o libpermrecassetutil.a
+	g++ $(LDFLAGS) -o $@ $^
+pra-fs-scan.o: pra-fs-scan.cpp
+	g++ $(CXXFLAGS) -c -o $@ $^
 
 mount-is-readonly: mount-is-readonly.o
 	g++ $(LDFLAGS) -o $@ $^
