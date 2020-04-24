@@ -71,6 +71,12 @@ bool prl_node_db_add_archive(prl_node_entry &ent,const std::string &name) {
     return true;
 }
 
+bool prl_node_db_add_fsentbyname(prl_node_entry &ent) {
+    /* add node with parent_node == parent_node, name = name
+     * If already exists, return without changing. */
+    return true;
+}
+
 int main(int argc,char **argv) {
     path_rel_label prl;
     procmount_list pml;
@@ -127,7 +133,10 @@ int main(int argc,char **argv) {
             child_node.real_name = (*i);
             child_node.name = (*i);
 
-            printf("   '%s'\n",child_node.real_name.string_value().c_str());
+            if (!prl_node_db_add_fsentbyname(/*in&out*/child_node)) {
+                fprintf(stderr,"Failed to add or update fs node\n");
+                return 1;
+            }
         }
     }
 
