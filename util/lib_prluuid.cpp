@@ -36,3 +36,7 @@ string prluuid_to_string(const prluuid &u) {
     return s;
 }
 
+std::string prluuid::to_string() const {
+    return prluuid_to_string(*this);
+}
+
