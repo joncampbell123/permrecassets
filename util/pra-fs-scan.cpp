@@ -14,12 +14,15 @@ using namespace std;
 
 const prluuid prl_zero_node = { 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0 };
 
-class prl_blob : public std::vector<uint8_t> {
+// TODO: Just make this code C++11 so we can use "using" instead of this mess
+typedef std::vector<uint8_t> prl_blob_base;
+
+class prl_blob : public prl_blob_base {
 public:
-    prl_blob() : std::vector<uint8_t>() { }
-    prl_blob(const std::string &x) : std::vector<uint8_t>() {
+    prl_blob() : prl_blob_base() { }
+    prl_blob(const std::string &x) : prl_blob_base() {
         resize(x.size());
-        for (size_t i=0;i < x.size();i++) std::vector<uint8_t>::operator[](i) = x[i]; /* Not the NUL at the end, though */
+        for (size_t i=0;i < x.size();i++) prl_blob_base::operator[](i) = x[i]; /* Not the NUL at the end, though */
     }
     ~prl_blob() { }
 };
