@@ -15,7 +15,7 @@ void prluuidgen(prluuid &u) {
     struct timeval tv;
     uint64_t tv64;
 
-    assert(sizeof(u) >= 24);
+    assert(sizeof(u.uuid) >= 24);
 
     gettimeofday(&tv,NULL);
     tv64 = ((uint64_t)tv.tv_sec * (uint64_t)1000) + ((uint64_t)tv.tv_usec / (uint64_t)1000)/*us->ms*/;
@@ -24,19 +24,17 @@ void prluuidgen(prluuid &u) {
     *((uint64_t*)(&u.uuid[16])) = htobe64(tv64);
 }
 
-string prluuid_to_string(const prluuid &u) {
+std::string prluuid::to_string() const {
     char tmp[8];
     string s;
 
+    assert(sizeof(uuid) >= 24);
+
     for (size_t i=0;i < 24;i++) {
-        sprintf(tmp,"%02x",u.uuid[i]);
+        sprintf(tmp,"%02x",uuid[i]);
         s += tmp;
     }
 
     return s;
-}
-
-std::string prluuid::to_string() const {
-    return prluuid_to_string(*this);
 }
 

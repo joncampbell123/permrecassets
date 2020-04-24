@@ -11,7 +11,6 @@ struct prluuid {
 };
 
 void prluuidgen(prluuid &u);
-std::string prluuid_to_string(const prluuid &u);
 
 #endif /*UTIL_LIB_PRLUUID_H*/
 
