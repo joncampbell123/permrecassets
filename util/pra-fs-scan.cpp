@@ -86,12 +86,30 @@ bool prl_node_db_add_fsentbyname(prl_node_entry &ent) {
     return true;
 }
 
+std::string cpp_realpath(const char *path) {
+    char *rp = realpath(path,NULL);
+    if (rp == NULL) return std::string();
+    std::string r = rp;
+    free(rp);
+    return r;
+}
+
+std::string cpp_realpath(const std::string &path) {
+    return cpp_realpath(path.c_str());
+}
+
 static void scan_dir(const path_rel_label &prl,const std::string &rpath,const prl_node_entry &parent_node) {
-    const std::string fpath = prl.mountpoint + "/" + rpath;
+    const std::string fpath = prl.mountpoint + (rpath.empty() ? "" : ("/" + rpath));
     prl_node_entry child_node;
     struct dirent *d;
     struct stat st;
     DIR *dir;
+
+    std::string ver;
+    if ((ver=cpp_realpath(fpath)) != fpath) {
+        fprintf(stderr,"Realpath failure for %s (scan_dir) got %s\n",fpath.c_str(),ver.c_str());
+        return;
+    }
 
     dir = opendir(fpath.c_str());
     if (dir == NULL) return;
@@ -131,7 +149,7 @@ static void scan_dir(const path_rel_label &prl,const std::string &rpath,const pr
         }
 
         if (S_ISDIR(st.st_mode)) {
-            scan_dir(prl,rpath + "/" + d->d_name,child_node); /* child node becomes parent later */
+            scan_dir(prl,rpath + (rpath.empty() ? "" : "/") + d->d_name,child_node); /* child node becomes parent later */
         }
     }
 
@@ -155,7 +173,7 @@ int main(int argc,char **argv) {
         return 1;
     }
     if (!S_ISDIR(st.st_mode)) {
-        perror("Not a directory");
+        fprintf(stderr,"Not a directory\n");
         return 1;
     }
 
@@ -183,10 +201,22 @@ int main(int argc,char **argv) {
 
     /* relative path */
     {
+        string rpath = prl.mountpoint;
         vector<string> path;
+
+        if (cpp_realpath(rpath) != rpath) {
+            fprintf(stderr,"Realpath failure for %s (207)\n",rpath.c_str());
+            return 1;
+        }
+
         prl_path_split(path,prl.relpath);
         for (vector<string>::iterator i=path.begin();i!=path.end();i++) {
             prl_node_entry child_node;
+
+            if (lstat(rpath.c_str(),&st) || !S_ISDIR(st.st_mode)) {
+                fprintf(stderr,"rpath dir verification fail\n");
+                return 1;
+            }
 
             child_node.type = NODE_TYPE_DIRECTORY;/*remember the above code MAKES SURE the path given is a directory*/
             child_node.parent_node = parent_node.node_id;
@@ -195,6 +225,14 @@ int main(int argc,char **argv) {
 
             if (!prl_node_db_add_fsentbyname(/*in&out*/child_node)) {
                 fprintf(stderr,"Failed to add or update fs node\n");
+                return 1;
+            }
+
+            rpath += "/";
+            rpath += (*i);
+
+            if (cpp_realpath(rpath) != rpath) {
+                fprintf(stderr,"Realpath failure for %s (234)\n",rpath.c_str());
                 return 1;
             }
 
