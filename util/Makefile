@@ -25,7 +25,7 @@ libpermrecassetutil.a: lib_procmount.o lib_path_rel_label.o
 	ar r $@ $^
 
 pra-fs-scan: pra-fs-scan.o libpermrecassetutil.a
-	g++ $(LDFLAGS) -o $@ $^
+	g++ $(LDFLAGS) -o $@ $^ -luuid
 pra-fs-scan.o: pra-fs-scan.cpp
 	g++ $(CXXFLAGS) -c -o $@ $^
 
