@@ -65,12 +65,16 @@ struct prl_node_entry {
     ~prl_node_entry() { }
 };
 
+/* in: name
+ * out: ent */
 bool prl_node_db_add_archive(prl_node_entry &ent,const std::string &name) {
     /* add node with parent_node == zero_node, name = name, type = ARCHIVE.
      * If already exists, return without changing. */
     return true;
 }
 
+/* in: ent.name, ent.parent_node
+ * out: ent.* */
 bool prl_node_db_add_fsentbyname(prl_node_entry &ent) {
     /* add node with parent_node == parent_node, name = name
      * If already exists, return without changing. */
