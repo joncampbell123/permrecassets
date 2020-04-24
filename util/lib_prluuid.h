@@ -4,7 +4,9 @@
 
 #include <string>
 
-typedef unsigned char prluuid[24]; /* 16-byte UUID + 8-byte timestamp */
+struct prluuid {
+    unsigned char       uuid[24]; /* 16-byte UUID + 8-byte timestamp */
+};
 
 void prluuidgen(prluuid &u);
 std::string prluuid_to_string(const prluuid &u);

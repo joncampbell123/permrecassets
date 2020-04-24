@@ -20,8 +20,8 @@ void prluuidgen(prluuid &u) {
     gettimeofday(&tv,NULL);
     tv64 = ((uint64_t)tv.tv_sec * (uint64_t)1000) + ((uint64_t)tv.tv_usec / (uint64_t)1000)/*us->ms*/;
 
-    uuid_generate(&u[0]);
-    *((uint64_t*)(&u[16])) = htobe64(tv64);
+    uuid_generate(&u.uuid[0]);
+    *((uint64_t*)(&u.uuid[16])) = htobe64(tv64);
 }
 
 string prluuid_to_string(const prluuid &u) {
@@ -29,7 +29,7 @@ string prluuid_to_string(const prluuid &u) {
     string s;
 
     for (size_t i=0;i < 24;i++) {
-        sprintf(tmp,"%02x",u[i]);
+        sprintf(tmp,"%02x",u.uuid[i]);
         s += tmp;
     }
 

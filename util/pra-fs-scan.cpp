@@ -109,7 +109,7 @@ int main(int argc,char **argv) {
             prl_node_entry child_node;
 
             child_node.type = NODE_TYPE_DIRECTORY;/*remember the above code MAKES SURE the path given is a directory*/
-//            child_node.parent_node = parent_node.node_id;
+            child_node.parent_node = parent_node.node_id;
             child_node.name = (*i);
 
             printf("   '%s'\n",(*i).c_str());
