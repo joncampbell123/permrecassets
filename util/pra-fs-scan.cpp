@@ -114,8 +114,6 @@ static void scan_dir(const path_rel_label &prl,const std::string &rpath,const pr
     dir = opendir(fpath.c_str());
     if (dir == NULL) return;
 
-    printf("Scanning: %s\n",fpath.c_str());
-
     while ((d=readdir(dir)) != NULL) {
         if (!strcmp(d->d_name,".") || !strcmp(d->d_name,".."))
             continue;
