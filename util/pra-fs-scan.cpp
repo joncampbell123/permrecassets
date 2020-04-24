@@ -14,7 +14,15 @@ using namespace std;
 
 const prluuid prl_zero_node = { 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0 };
 
-typedef std::vector<uint8_t> prl_blob;
+class prl_blob : public std::vector<uint8_t> {
+public:
+    prl_blob() : std::vector<uint8_t>() { }
+    prl_blob(const std::string &x) : std::vector<uint8_t>() {
+        resize(x.size());
+        for (size_t i=0;i < x.size();i++) std::vector<uint8_t>::operator[](i) = x[i]; /* Not the NUL at the end, though */
+    }
+    ~prl_blob() { }
+};
 
 enum prl_node_type {
     NODE_TYPE_NULL=0,                           // 0
@@ -110,6 +118,7 @@ int main(int argc,char **argv) {
 
             child_node.type = NODE_TYPE_DIRECTORY;/*remember the above code MAKES SURE the path given is a directory*/
             child_node.parent_node = parent_node.node_id;
+            child_node.real_name = (*i);
             child_node.name = (*i);
 
             printf("   '%s'\n",(*i).c_str());
