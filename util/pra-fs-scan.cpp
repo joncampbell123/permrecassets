@@ -82,6 +82,7 @@ bool prl_node_db_add_fsentbyname(prl_node_entry &ent) {
 }
 
 int main(int argc,char **argv) {
+    prl_node_entry parent_node;
     path_rel_label prl;
     procmount_list pml;
     struct stat st;
@@ -117,8 +118,6 @@ int main(int argc,char **argv) {
         fprintf(stderr,"Filesystem must have a label\n");
         return 1;
     }
-
-    prl_node_entry parent_node;
 
     if (!prl_node_db_add_archive(/*&return*/parent_node,prl.fs_label)) {
         fprintf(stderr,"Failed to add or update archive node\n");
