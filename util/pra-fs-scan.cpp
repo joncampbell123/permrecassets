@@ -15,6 +15,23 @@ const prluuid prl_zero_node = { 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0
 
 typedef std::vector<uint8_t> prl_blob;
 
+enum prl_node_type {
+    NODE_TYPE_NULL=0,                           // 0
+    NODE_TYPE_FILE,                             // 1
+    NODE_TYPE_DIRECTORY,                        // 2
+    NODE_TYPE_ARCHIVE,                          // 3
+    NODE_TYPE_ARCHIVE_COLLECTION,               // 4
+    NODE_TYPE_VIEW,                             // 5
+    NODE_TYPE_SYMLINK,                          // 6
+
+    NODE_TYPE_MAX
+};
+
+enum prl_node_flags {
+    NODE_FLAG_PRIVATE=(1 << 0),                 // private node, do not show publicly
+    NODE_FLAG_USER_MODIFIED_CHARSET=(1 << 1)    // user modified charset, do not auto-modify later
+};
+
 /* instead of passing a million parameters for each part, pass a struct instead.
  * addition of fields is just add a new struct member and recompile away. */
 struct prl_node_entry {
