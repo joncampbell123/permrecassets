@@ -3,6 +3,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdint.h>
+#include <unistd.h>
+#include <fcntl.h>
 #include <stdio.h>
 
 #include "lib_procmount.h"
@@ -60,8 +62,9 @@ struct prl_node_entry {
     std::string     mime_string;
     std::string     content_encoding;
     unsigned int    flags;
+    unsigned int    index;                      // in case of archive files that list the same file multiple times
 
-    prl_node_entry() : size(0),type(0),flags(0) { }
+    prl_node_entry() : size(0),type(0),flags(0),index(0) { }
     ~prl_node_entry() { }
 };
 
