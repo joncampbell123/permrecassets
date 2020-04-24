@@ -75,6 +75,13 @@ struct prl_node_entry {
 bool prl_node_db_add_archive(prl_node_entry &ent,const std::string &name) {
     /* add node with parent_node == zero_node, name = name, type = ARCHIVE.
      * If already exists, return without changing. */
+    prluuidgen(ent.node_id);
+    ent.parent_node = prl_zero_node;
+    ent.name = name;
+    ent.real_name = name;
+    ent.size = 0;
+    ent.type = NODE_TYPE_ARCHIVE;
+    fprintf(stderr,"DEBUG: Add archive '%s' return node_id '%s'\n",name.c_str(),ent.node_id.to_string().c_str());
     return true;
 }
 
@@ -83,6 +90,8 @@ bool prl_node_db_add_archive(prl_node_entry &ent,const std::string &name) {
 bool prl_node_db_add_fsentbyname(prl_node_entry &ent) {
     /* add node with parent_node == parent_node, name = name
      * If already exists, return without changing. */
+    prluuidgen(ent.node_id);
+    fprintf(stderr,"DEBUG: Add fsent parent '%s' name '%s' return node_id '%s'\n",ent.parent_node.to_string().c_str(),ent.name.c_str(),ent.node_id.to_string().c_str());
     return true;
 }
 
