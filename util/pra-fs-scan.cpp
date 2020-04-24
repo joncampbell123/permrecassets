@@ -2,7 +2,9 @@
 #include <assert.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <dirent.h>
 #include <stdint.h>
+#include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -84,6 +86,58 @@ bool prl_node_db_add_fsentbyname(prl_node_entry &ent) {
     return true;
 }
 
+static void scan_dir(const path_rel_label &prl,const std::string &rpath,const prl_node_entry &parent_node) {
+    const std::string fpath = prl.mountpoint + "/" + rpath;
+    prl_node_entry child_node;
+    struct dirent *d;
+    struct stat st;
+    DIR *dir;
+
+    dir = opendir(fpath.c_str());
+    if (dir == NULL) return;
+
+    printf("Scanning: %s\n",fpath.c_str());
+
+    while ((d=readdir(dir)) != NULL) {
+        if (!strcmp(d->d_name,".") || !strcmp(d->d_name,".."))
+            continue;
+
+        const std::string filepath = fpath + "/" + d->d_name;
+
+        if (lstat(filepath.c_str(),&st)) continue;
+
+        child_node.parent_node = parent_node.node_id;
+        child_node.real_name = std::string(d->d_name);
+        child_node.name = d->d_name;
+
+        if (S_ISREG(st.st_mode)) {
+            child_node.type = NODE_TYPE_FILE;
+            child_node.size = (uint64_t)st.st_size;
+        }
+        else if (S_ISDIR(st.st_mode)) {
+            child_node.type = NODE_TYPE_DIRECTORY;
+        }
+        else if (S_ISLNK(st.st_mode)) {
+            child_node.type = NODE_TYPE_SYMLINK;
+        }
+        else {
+            continue;
+        }
+
+        /* also updates node_id */
+        if (!prl_node_db_add_fsentbyname(/*in&out*/child_node)) {
+            fprintf(stderr,"Failed to add or update fs node\n");
+            break;
+        }
+
+        if (S_ISDIR(st.st_mode)) {
+            scan_dir(prl,rpath + "/" + d->d_name,child_node); /* child node becomes parent later */
+        }
+    }
+
+    closedir(dir);
+}
+
 int main(int argc,char **argv) {
     prl_node_entry parent_node;
     path_rel_label prl;
@@ -148,6 +202,9 @@ int main(int argc,char **argv) {
             parent_node = child_node;
         }
     }
+
+    /* scandir */
+    scan_dir(prl,prl.relpath,parent_node);
 
     return 0;
 }
