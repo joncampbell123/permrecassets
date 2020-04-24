@@ -51,7 +51,7 @@ struct prl_node_entry {
     ~prl_node_entry() { }
 };
 
-bool prl_node_db_add_archive(const std::string &name) {
+bool prl_node_db_add_archive(prl_node_entry &ent,const std::string &name) {
     /* add node with parent_node == zero_node, name = name, type = ARCHIVE.
      * If already exists, return without changing. */
     return true;
@@ -94,7 +94,9 @@ int main(int argc,char **argv) {
         return 1;
     }
 
-    if (!prl_node_db_add_archive(prl.fs_label)) {
+    prl_node_entry archive_root;
+
+    if (!prl_node_db_add_archive(archive_root,prl.fs_label)) {
         fprintf(stderr,"Failed to add or update archive node\n");
         return 1;
     }
