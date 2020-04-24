@@ -21,10 +21,6 @@ int main(int argc,char **argv) {
         return 1;
     }
 
-    prluuid uuid;
-    prluuidgen(uuid);
-    fprintf(stderr,"%s\n",prluuid_to_string(uuid).c_str());
-
     /* the given location must be a directory. not a file. not a symlink. */
     if (lstat(argv[1],&st)) {
         perror("Cannot stat");
