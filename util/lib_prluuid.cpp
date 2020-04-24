@@ -1,13 +1,10 @@
 
 #include <assert.h>
 #include <sys/types.h>
-#include <sys/stat.h>
 #include <sys/time.h>
 #include <stdint.h>
 #include <stdio.h>
 
-#include "lib_procmount.h"
-#include "lib_path_rel_label.h"
 #include "lib_prluuid.h"
 
 #include <uuid/uuid.h>
