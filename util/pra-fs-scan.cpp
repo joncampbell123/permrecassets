@@ -25,6 +25,9 @@ public:
         for (size_t i=0;i < x.size();i++) prl_blob_base::operator[](i) = x[i]; /* Not the NUL at the end, though */
     }
     ~prl_blob() { }
+    std::string string_value(void) const {
+        return std::string((char*)(&prl_blob_base::operator[](0)),prl_blob_base::size());
+    }
 };
 
 enum prl_node_type {
@@ -124,7 +127,7 @@ int main(int argc,char **argv) {
             child_node.real_name = (*i);
             child_node.name = (*i);
 
-            printf("   '%s'\n",(*i).c_str());
+            printf("   '%s'\n",child_node.real_name.string_value().c_str());
         }
     }
 
