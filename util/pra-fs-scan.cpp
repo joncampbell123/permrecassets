@@ -11,6 +11,8 @@
 
 using namespace std;
 
+const prluuid prl_zero_node = { 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0 };
+
 int main(int argc,char **argv) {
     path_rel_label prl;
     procmount_list pml;
