@@ -94,9 +94,9 @@ int main(int argc,char **argv) {
         return 1;
     }
 
-    prl_node_entry archive_root;
+    prl_node_entry parent_node;
 
-    if (!prl_node_db_add_archive(archive_root,prl.fs_label)) {
+    if (!prl_node_db_add_archive(/*&return*/parent_node,prl.fs_label)) {
         fprintf(stderr,"Failed to add or update archive node\n");
         return 1;
     }
@@ -106,6 +106,12 @@ int main(int argc,char **argv) {
         vector<string> path;
         prl_path_split(path,prl.relpath);
         for (vector<string>::iterator i=path.begin();i!=path.end();i++) {
+            prl_node_entry child_node;
+
+            child_node.type = NODE_TYPE_DIRECTORY;/*remember the above code MAKES SURE the path given is a directory*/
+//            child_node.parent_node = parent_node.node_id;
+            child_node.name = (*i);
+
             printf("   '%s'\n",(*i).c_str());
         }
     }
