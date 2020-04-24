@@ -43,6 +43,11 @@ int main(int argc,char **argv) {
     printf("  relpath:          '%s'\n",prl.relpath.c_str());
     printf("  device:           '%s'\n",prl.device.c_str());
 
+    if (prl.fs_label.empty()) {
+        fprintf(stderr,"Filesystem must have a label\n");
+        return 1;
+    }
+
     return 0;
 }
 
