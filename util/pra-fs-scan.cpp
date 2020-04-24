@@ -141,6 +141,9 @@ int main(int argc,char **argv) {
                 fprintf(stderr,"Failed to add or update fs node\n");
                 return 1;
             }
+
+            /* updates child_node.node_id, which becomes the parent_node */
+            parent_node = child_node;
         }
     }
 
