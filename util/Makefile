@@ -1,6 +1,6 @@
 PROGS=mount-is-readonly mount-rel-path pra-fs-scan
 
-CXXFLAGS=
+CXXFLAGS=-std=c++11 -Wall -Wextra -pedantic 
 LDFLAGS=
 
 all: $(PROGS)
