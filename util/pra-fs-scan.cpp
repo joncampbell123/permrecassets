@@ -50,6 +50,28 @@ struct prl_node_entry {
     ~prl_node_entry() { }
 };
 
+bool prl_node_db_add_archive(const std::string &name) {
+    /* add node with parent_node == zero_node, name = name, type = ARCHIVE.
+     * If already exists, return without changing. */
+    return true;
+}
+
+void prl_path_split(std::vector<std::string> &spath,const std::string &path) {
+    spath.clear();
+
+    {
+        const char *s;
+
+        s = path.c_str();
+        while (*s != 0) {
+            const char *f = s;
+            while (*s != 0 && *s != '/') s++;
+            if (s > f) spath.push_back(std::string(f,(size_t)(s-f)));
+            while (*s != 0 && *s == '/') s++;
+        }
+    }
+}
+
 int main(int argc,char **argv) {
     path_rel_label prl;
     procmount_list pml;
@@ -85,6 +107,20 @@ int main(int argc,char **argv) {
     if (prl.fs_label.empty()) {
         fprintf(stderr,"Filesystem must have a label\n");
         return 1;
+    }
+
+    if (!prl_node_db_add_archive(prl.fs_label)) {
+        fprintf(stderr,"Failed to add or update archive node\n");
+        return 1;
+    }
+
+    /* relative path */
+    {
+        vector<string> path;
+        prl_path_split(path,prl.relpath);
+        for (vector<string>::iterator i=path.begin();i!=path.end();i++) {
+            printf("   '%s'\n",(*i).c_str());
+        }
     }
 
     return 0;
