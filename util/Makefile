@@ -26,9 +26,11 @@ lib_splitpath.o: lib_splitpath.cpp
 	g++ $(CXXFLAGS) -c -o $@ $^
 lib_procmount.o: lib_procmount.cpp
 	g++ $(CXXFLAGS) -c -o $@ $^
+lib_cpp_realpath.o: lib_cpp_realpath.cpp
+	g++ $(CXXFLAGS) -c -o $@ $^
 lib_path_rel_label.o: lib_path_rel_label.cpp
 	g++ $(CXXFLAGS) -c -o $@ $^
-libpermrecassetutil.a: lib_procmount.o lib_path_rel_label.o lib_prluuid.o lib_splitpath.o lib_prl_nodes.o
+libpermrecassetutil.a: lib_procmount.o lib_path_rel_label.o lib_prluuid.o lib_splitpath.o lib_prl_nodes.o lib_cpp_realpath.o
 	rm -f $@
 	ar r $@ $^
 

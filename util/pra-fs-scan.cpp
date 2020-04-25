@@ -15,20 +15,9 @@
 #include "lib_splitpath.h"
 #include "lib_prl_blob.h"
 #include "lib_prl_nodes.h"
+#include "lib_cpp_realpath.h"
 
 using namespace std;
-
-std::string cpp_realpath(const char *path) {
-    char *rp = realpath(path,NULL);
-    if (rp == NULL) return std::string();
-    std::string r = rp;
-    free(rp);
-    return r;
-}
-
-std::string cpp_realpath(const std::string &path) {
-    return cpp_realpath(path.c_str());
-}
 
 static void scan_dir(const path_rel_label &prl,const std::string &rpath,const prl_node_entry &parent_node) {
     const std::string fpath = prl.mountpoint + (rpath.empty() ? "" : ("/" + rpath));
