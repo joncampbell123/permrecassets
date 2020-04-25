@@ -57,6 +57,49 @@ std::string read_in(void) {
 	return ret;
 }
 
+std::string prompt_text(const std::string &title) {
+    std::string resp;
+
+    printf("\x1B[0m");
+    printf("\x1B[2J");
+    printf("\x1B[H");
+    printf("%s\n",title.c_str());
+    fflush(stdout);
+
+    do {
+        printf("\x1B[3H");
+        printf("%s",resp.c_str());
+        printf("\x1B[J");
+        fflush(stdout);
+
+        std::string inkey = read_in();
+
+        if (inkey.empty())
+            break;
+        else if (inkey == "\x1B" || inkey == "\x1B\x1B")
+            return std::string();
+        else if (inkey == "\x0A" || inkey == "\x0D")
+            break;
+        else if (inkey == "\x08" || inkey == "\x7F") {
+            if (resp.length() > 0) {
+                /* UTF-8 erase 0xC0 0x80 */
+                int e = (int)resp.length() - 1;
+                while (e > 0 && ((unsigned char)resp[e] >= 0x80 && (unsigned char)resp[e] < 0xC0)) e--;
+                assert(e >= 0);
+                assert(e <= (int)resp.length());
+                resp = resp.substr(0,e);
+            }
+        }
+        else if (inkey == "\x1B[3~") { /* delete */
+            resp.clear();
+        }
+        else if (inkey[0] >= 32 || inkey[0] < 0)
+            resp += inkey;
+    } while(1);
+
+    return resp;
+}
+
 std::string file_size_human_friendly(uint64_t sz) {
     const char *suffix = "B ";
     uint64_t frac = 0;
@@ -219,6 +262,15 @@ void editorLoop(void) {
             prl_node_db_lookup_by_node_id(parent_node);
             prl_node_db_lookup_children_of_parent(/*&r*/rlist,parent_node);
             select = 0;
+            redraw = 1;
+        }
+        else if (key == "F") {
+            string resp = prompt_text("File search");
+            printf("\x1B[0m");
+            printf("\x1B[2J" "\x1B[H"); fflush(stdout);
+            printf("'%s'\n",resp.c_str());
+            fflush(stdout);
+            read_in();
             redraw = 1;
         }
 	}
