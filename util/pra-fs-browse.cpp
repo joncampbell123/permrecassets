@@ -162,7 +162,7 @@ void filesearchloop(const std::string &query) {
             printf("\x1B[0m");
             printf("\x1B[2J" "\x1B[H"); fflush(stdout);
 
-            printf("\x1B[1;1H" "Search results for '%s'\n",query.c_str());
+            printf("\x1B[1;1H" "%zu search results for '%s'\n",rlist.size(),query.c_str());
 
             if (rlist.empty()) printf("\n(none)\n");
 
