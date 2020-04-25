@@ -55,7 +55,7 @@ std::string read_in(void) {
 }
 
 std::string file_size_human_friendly(uint64_t sz) {
-    const char *suffix = "B";
+    const char *suffix = "B ";
     uint64_t frac = 0;
     char tmp[128];
 
@@ -83,7 +83,7 @@ std::string file_size_human_friendly(uint64_t sz) {
         suffix = "TB";
     }
 
-    sprintf(tmp,"%llu.%llu",(unsigned long long)sz,(frac * 1000ull) / 1024ull);
+    sprintf(tmp,"%llu.%03llu",(unsigned long long)sz,(frac * 1000ull) / 1024ull);
     return std::string(tmp) + suffix;
 }
 
