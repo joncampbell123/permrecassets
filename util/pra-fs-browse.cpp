@@ -133,6 +133,8 @@ std::string file_size_human_friendly(uint64_t sz) {
     return std::string(tmp) + suffix;
 }
 
+void browseloop(void);
+
 void filesearchloop(const std::string &query) {
     int listtop = 3;
     int listheight = 22;
@@ -233,19 +235,22 @@ void filesearchloop(const std::string &query) {
 		}
         else if (key == "\x0D" || key == "\x0A") { /* enter */
             if (select >= 0 && (size_t)select < rlist.size()) {
-                parent_node = rlist[select];
+                if (rlist[select].type == NODE_TYPE_FILE) {
+                    parent_node.node_id = rlist[select].parent_node;
+                    prl_node_db_lookup_by_node_id(parent_node);
+                }
+                else {
+                    parent_node = rlist[select];
+                }
+
                 prl_node_db_lookup_by_node_id(parent_node);
-                prl_node_db_lookup_children_of_parent(/*&r*/rlist,parent_node);
+                browseloop();
                 select = 0;
                 redraw = 1;
             }
         }
         else if (key == "\x08" || key == "\x7F") { /* backspace */
-            parent_node.node_id = parent_node.parent_node;
-            prl_node_db_lookup_by_node_id(parent_node);
-            prl_node_db_lookup_children_of_parent(/*&r*/rlist,parent_node);
-            select = 0;
-            redraw = 1;
+            break;
         }
     }
 
@@ -253,33 +258,18 @@ void filesearchloop(const std::string &query) {
 	printf("\x1B[2J" "\x1B[H"); fflush(stdout);
 }
 
-void editorLoop(void) {
+void browseloop(void) {
     int listtop = 3;
     int listheight = 22;
 	unsigned char run = 1;
 	unsigned char redraw = 1;
     int select = 0;
     int scroll = 0;
-	struct termios omode,mode;
     std::vector<prl_node_entry> rlist;
     std::string key;
 
-    (void)swidth;
-
-    if (!prl_node_db_open_ro()) {
-        fprintf(stderr,"Unable to open SQLite3 DB. Use pra-fs-scan-db-init.sh\n");
-        return;
-    }
-
-    parent_node = prl_node_entry();
-    parent_node.node_id = prl_zero_node;
     prl_node_db_lookup_by_node_id(parent_node);
     prl_node_db_lookup_children_of_parent(/*&r*/rlist,parent_node);
-
-	tcgetattr(0/*STDIN*/,&omode);
-	mode = omode;
-	mode.c_lflag &= ~(ICANON | ECHO | ECHOE | ECHOK | ECHONL | ECHOCTL);
-	tcsetattr(0/*STDIN*/,TCSANOW,&mode);
 
 	while (run) {
 		if (redraw) {
@@ -392,6 +382,25 @@ void editorLoop(void) {
             redraw = 1;
         }
     }
+}
+
+void editorLoop(void) {
+	struct termios omode,mode;
+
+    if (!prl_node_db_open_ro()) {
+        fprintf(stderr,"Unable to open SQLite3 DB. Use pra-fs-scan-db-init.sh\n");
+        return;
+    }
+
+    parent_node = prl_node_entry();
+    parent_node.node_id = prl_zero_node;
+
+	tcgetattr(0/*STDIN*/,&omode);
+	mode = omode;
+	mode.c_lflag &= ~(ICANON | ECHO | ECHOE | ECHOK | ECHONL | ECHOCTL);
+	tcsetattr(0/*STDIN*/,TCSANOW,&mode);
+
+    browseloop();
 
 	tcsetattr(0/*STDIN*/,TCSANOW,&omode);
 
