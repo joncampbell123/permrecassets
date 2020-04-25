@@ -77,6 +77,12 @@ std::string file_size_human_friendly(uint64_t sz) {
         suffix = "GB";
     }
 
+    if (sz >= (uint64_t)1024ull) {
+        frac = sz & (uint64_t)1023ull;
+        sz >>= (uint64_t)10ull;
+        suffix = "TB";
+    }
+
     sprintf(tmp,"%llu.%llu",(unsigned long long)sz,(frac * 1000ull) / 1024ull);
     return std::string(tmp) + suffix;
 }
