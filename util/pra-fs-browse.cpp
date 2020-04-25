@@ -153,8 +153,10 @@ void filesearchloop(const std::string &query) {
 
             printf("\x1B[1;1H" "Search results for '%s'\n",query.c_str());
 
+            if (rlist.empty()) printf("\n(none)\n");
+
             listtop = 3;
-            listheight = sheight - 2;
+            listheight = sheight - 4;
 
             if (scroll > select)
                 scroll = select;
