@@ -15,7 +15,7 @@ install: $(PROGS)
 	cp -v pra-fs-scan $(DESTDIR)/usr/bin/
 
 clean:
-	rm -f $(PROGS) *.o *.a
+	rm -f $(PROGS) *.o *.a *.db
 
 lib_prluuid.o: lib_prluuid.cpp
 	g++ $(CXXFLAGS) -c -o $@ $^
