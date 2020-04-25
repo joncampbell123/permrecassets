@@ -133,6 +133,124 @@ std::string file_size_human_friendly(uint64_t sz) {
     return std::string(tmp) + suffix;
 }
 
+void filesearchloop(const std::string &query) {
+    int listtop = 3;
+    int listheight = 22;
+	unsigned char run = 1;
+	unsigned char redraw = 1;
+    int select = 0;
+    int scroll = 0;
+    std::vector<prl_node_entry> rlist;
+    std::string key;
+
+    prl_node_db_lookup_file_query(/*&r*/rlist,query);
+
+	while (run) {
+		if (redraw) {
+            /* erase screen, home cursor */
+            printf("\x1B[0m");
+            printf("\x1B[2J" "\x1B[H"); fflush(stdout);
+
+            printf("\x1B[1;1H" "Search results for '%s'\n",query.c_str());
+
+            listtop = 3;
+            listheight = sheight - 2;
+
+            if (scroll > select)
+                scroll = select;
+            if (scroll < (select-(listheight-1)))
+                scroll = (select-(listheight-1));
+
+            for (int s=0;s < listheight;s++) {
+                if ((size_t)(s+scroll) < rlist.size()) {
+                    const char *typ = "?";
+                    const prl_node_entry &ent = rlist[s+scroll];
+
+                    switch (ent.type) {
+                        case NODE_TYPE_FILE:        typ = "File"; break;
+                        case NODE_TYPE_DIRECTORY:   typ = "Dir"; break;
+                        case NODE_TYPE_ARCHIVE:     typ = "Arch"; break;
+                        case NODE_TYPE_VIEW:        typ = "View"; break;
+                        default:                    typ = "?"; break;
+                    };
+
+                    if ((s+scroll) == select)
+                        printf("\x1B[7m");
+                    else
+                        printf("\x1B[0m");
+
+                    printf("\x1B[%d;1H" "%-5s",s+listtop,typ);
+                    if (ent.type == NODE_TYPE_FILE) printf(" %10s",file_size_human_friendly(ent.size).c_str());
+                    else                            printf("           ");
+                    printf(" ");
+                    printf("\x1B[1m");
+                    printf("%s",ent.name.c_str());
+                    printf("\x1B[0K");
+                    printf("\x1B[0m");
+                    fflush(stdout);
+                }
+            }
+
+            printf("\x1B[0m");
+            fflush(stdout);
+
+			/* done */
+			redraw = 0;
+		}
+
+		key = read_in();
+		if (key.empty()) break;
+		if (key == "\x1B" || key == "\x1B\x1B") break;
+
+		if (key == "\x1B[A") { /* up arrow */
+            if (select > 0) {
+                select--;
+                redraw = 1;
+            }
+		}
+		else if (key == "\x1B[B") { /* down arrow */
+            if (!rlist.empty() && (size_t)(select+1) < rlist.size()) {
+                select++;
+                redraw = 1;
+            }
+		}
+        else if (key == "\x1B[5~") { /* page up */
+            select -= listheight - 1;
+            if (select < 0) select = 0;
+            redraw = 1;
+        }
+        else if (key == "\x1B[6~") { /* page down */
+            select += listheight - 1;
+            if (select >= (int)rlist.size()) select = (int)rlist.size() - 1;
+            if (select < 0) select = 0;
+            redraw = 1;
+        }
+		else if (key == "\x1B[D") { /* left arrow */
+		}
+		else if (key == "\x1B[C") { /* right arrow */
+		}
+        else if (key == "\x0D" || key == "\x0A") { /* enter */
+            if (select >= 0 && (size_t)select < rlist.size()) {
+                parent_node = rlist[select];
+                prl_node_db_lookup_by_node_id(parent_node);
+                prl_node_db_lookup_children_of_parent(/*&r*/rlist,parent_node);
+                select = 0;
+                redraw = 1;
+            }
+        }
+        else if (key == "\x08" || key == "\x7F") { /* backspace */
+            parent_node.node_id = parent_node.parent_node;
+            prl_node_db_lookup_by_node_id(parent_node);
+            prl_node_db_lookup_children_of_parent(/*&r*/rlist,parent_node);
+            select = 0;
+            redraw = 1;
+        }
+    }
+
+	/* erase screen, home cursor */
+	printf("\x1B[2J" "\x1B[H"); fflush(stdout);
+}
+
 void editorLoop(void) {
     int listtop = 3;
     int listheight = 22;
@@ -266,14 +384,12 @@ void editorLoop(void) {
         }
         else if (key == "F") {
             string resp = prompt_text("File search");
-            printf("\x1B[0m");
-            printf("\x1B[2J" "\x1B[H"); fflush(stdout);
-            printf("'%s'\n",resp.c_str());
-            fflush(stdout);
-            read_in();
+            if (!resp.empty()) {
+                filesearchloop(resp);
+            }
             redraw = 1;
         }
-	}
+    }
 
 	tcsetattr(0/*STDIN*/,TCSANOW,&omode);
 

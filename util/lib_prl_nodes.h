@@ -50,6 +50,7 @@ void prl_node_db_close(void);
 bool prl_node_db_open_ro(void);
 bool prl_node_db_add_fsentbyname(prl_node_entry &ent);
 bool prl_node_db_lookup_by_node_id(prl_node_entry &ent);
+bool prl_node_db_lookup_file_query(std::vector<prl_node_entry> &rlist,const std::string &query);
 bool prl_node_db_lookup_children_of_parent(std::vector<prl_node_entry> &rlist,prl_node_entry &pent);
 
 #endif /*UTIL_LIB_PRL_NODES_H*/
