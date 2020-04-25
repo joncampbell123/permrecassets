@@ -148,7 +148,8 @@ bool prl_node_db_add_archive(prl_node_entry &ent,const std::string &name) {
 
     prluuidgen(ent.node_id);
 
-    if (sqlite3_prepare_v2(prl_node_db_sqlite,"INSERT INTO nodes (node_id,parent_node,name,real_name,size,type) VALUES(?,?,?,?,?,?);",-1,&stmt,&pztail) != SQLITE_OK) {
+    /*                                                            1       2           3    4         5            6    7    8     9             1 2 3 4 5 6 7 8 9 */
+    if (sqlite3_prepare_v2(prl_node_db_sqlite,"INSERT INTO nodes (node_id,parent_node,name,real_name,name_charset,size,type,mtime,inode) VALUES(?,?,?,?,?,?,?,?,?);",-1,&stmt,&pztail) != SQLITE_OK) {
         fprintf(stderr,"db_add_archive insert statement prepare failed\n");
         return false;
     }
@@ -157,8 +158,11 @@ bool prl_node_db_add_archive(prl_node_entry &ent,const std::string &name) {
     sqlite3_bind_blob(stmt,2,ent.parent_node.uuid,sizeof(ent.parent_node.uuid),NULL);/*parent_node*/
     sqlite3_bind_text(stmt,3,ent.name.c_str(),-1,NULL);/*name*/
     sqlite3_bind_blob(stmt,4,&ent.real_name[0],ent.real_name.size(),NULL);/*real_name*/
-    sqlite3_bind_int64(stmt,5,ent.size);/*size*/
-    sqlite3_bind_int(stmt,6,ent.type);/*type*/
+    sqlite3_bind_text(stmt,5,ent.name_charset.c_str(),-1,NULL);/*name_charset*/
+    sqlite3_bind_int64(stmt,6,ent.size);/*size*/
+    sqlite3_bind_int(stmt,7,ent.type);/*type*/
+    sqlite3_bind_int64(stmt,8,ent.mtime);/*mtime*/
+    sqlite3_bind_int64(stmt,9,ent.inode);/*inode*/
     do {
         sr = sqlite3_step(stmt);
         if (sr == SQLITE_BUSY) continue;
@@ -224,7 +228,8 @@ bool prl_node_db_add_fsentbyname(prl_node_entry &ent) {
 
     prluuidgen(ent.node_id);
 
-    if (sqlite3_prepare_v2(prl_node_db_sqlite,"INSERT INTO nodes (node_id,parent_node,name,real_name,size,type) VALUES(?,?,?,?,?,?);",-1,&stmt,&pztail) != SQLITE_OK) {
+    /*                                                            1       2           3    4         5            6    7    8     9             1 2 3 4 5 6 7 8 9 */
+    if (sqlite3_prepare_v2(prl_node_db_sqlite,"INSERT INTO nodes (node_id,parent_node,name,real_name,name_charset,size,type,mtime,inode) VALUES(?,?,?,?,?,?,?,?,?);",-1,&stmt,&pztail) != SQLITE_OK) {
         fprintf(stderr,"db_add_archive insert statement prepare failed\n");
         return false;
     }
@@ -233,8 +238,11 @@ bool prl_node_db_add_fsentbyname(prl_node_entry &ent) {
     sqlite3_bind_blob(stmt,2,ent.parent_node.uuid,sizeof(ent.parent_node.uuid),NULL);/*parent_node*/
     sqlite3_bind_text(stmt,3,ent.name.c_str(),-1,NULL);/*name*/
     sqlite3_bind_blob(stmt,4,&ent.real_name[0],ent.real_name.size(),NULL);/*real_name*/
-    sqlite3_bind_int64(stmt,5,ent.size);/*size*/
-    sqlite3_bind_int(stmt,6,ent.type);/*type*/
+    sqlite3_bind_text(stmt,5,ent.name_charset.c_str(),-1,NULL);/*name_charset*/
+    sqlite3_bind_int64(stmt,6,ent.size);/*size*/
+    sqlite3_bind_int(stmt,7,ent.type);/*type*/
+    sqlite3_bind_int64(stmt,8,ent.mtime);/*mtime*/
+    sqlite3_bind_int64(stmt,9,ent.inode);/*inode*/
     do {
         sr = sqlite3_step(stmt);
         if (sr == SQLITE_BUSY) continue;
