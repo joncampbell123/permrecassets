@@ -84,6 +84,8 @@ std::string file_size_human_friendly(uint64_t sz) {
 void editorLoop(void) {
     int sheight = 25;
     int swidth = 80;
+    int listtop = 3;
+    int listheight = 22;
 	unsigned char run = 1;
 	unsigned char redraw = 1;
     int select = 0;
@@ -118,12 +120,15 @@ void editorLoop(void) {
                 parent_node.name.c_str(),
                 rlist.size());
 
+            listtop = 3;
+            listheight = sheight - 2;
+
             if (scroll > select)
                 scroll = select;
-            if (scroll < (select-(sheight-3)))
-                scroll = (select-(sheight-3));
+            if (scroll < (select-(listheight-1)))
+                scroll = (select-(listheight-1));
 
-            for (int s=0;(s+2) < sheight;s++) {
+            for (int s=0;s < listheight;s++) {
                 if ((size_t)(s+scroll) < rlist.size()) {
                     const char *typ = "?";
                     const prl_node_entry &ent = rlist[s+scroll];
@@ -141,7 +146,7 @@ void editorLoop(void) {
                     else
                         printf("\x1B[0m");
 
-                    printf("\x1B[%d;1H" "%-5s",s+1+2,typ);
+                    printf("\x1B[%d;1H" "%-5s",s+listtop,typ);
                     if (ent.type == NODE_TYPE_FILE) printf(" %10s",file_size_human_friendly(ent.size).c_str());
                     else                            printf("           ");
                     printf(" ");
@@ -177,12 +182,12 @@ void editorLoop(void) {
             }
 		}
         else if (key == "\x1B[5~") { /* page up */
-            select -= sheight - 3;
+            select -= listheight - 1;
             if (select < 0) select = 0;
             redraw = 1;
         }
         else if (key == "\x1B[6~") { /* page down */
-            select += sheight - 3;
+            select += listheight - 1;
             if (select >= (int)rlist.size()) select = (int)rlist.size() - 1;
             if (select < 0) select = 0;
             redraw = 1;
