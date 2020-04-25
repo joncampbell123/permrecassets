@@ -49,6 +49,7 @@ bool prl_node_db_open(void);
 void prl_node_db_close(void);
 bool prl_node_db_open_ro(void);
 bool prl_node_db_add_fsentbyname(prl_node_entry &ent);
+bool prl_node_db_lookup_by_node_id(prl_node_entry &ent);
 
 #endif /*UTIL_LIB_PRL_NODES_H*/
 

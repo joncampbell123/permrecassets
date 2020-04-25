@@ -55,6 +55,93 @@ void prl_node_db_close(void) {
     }
 }
 
+/* in ent.node_id
+ * out: ent.* */
+bool prl_node_db_lookup_by_node_id(prl_node_entry &ent) {
+    sqlite3_stmt* stmt = NULL;
+    const char* pztail = NULL;
+    int results,sr;
+
+    /*                                                0           1    2         3            4    5    6           7                8     9     10 */
+    if (sqlite3_prepare_v2(prl_node_db_sqlite,"SELECT parent_node,name,real_name,name_charset,size,type,mime_string,content_encoding,flags,mtime,inode FROM nodes WHERE node_id = ? LIMIT 1;",-1,&stmt,&pztail) != SQLITE_OK) {
+        fprintf(stderr,"db_add_archive statement prepare failed\n");
+        return false;
+    }
+    results = 0;
+    sqlite3_bind_blob(stmt,1,ent.node_id.uuid,sizeof(ent.node_id.uuid),NULL);/*node_id*/
+    do {
+        sr = sqlite3_step(stmt);
+        if (sr == SQLITE_BUSY) continue;
+        else if (sr == SQLITE_DONE) break;
+        else if (sr == SQLITE_ROW) {
+            if (results == 0) {
+                /* parent_node */
+                {
+                    ent.parent_node = prl_zero_node;
+                    int blobsz = sqlite3_column_bytes(stmt,0);
+                    if (blobsz == sizeof(ent.parent_node.uuid)) {
+                        const void *b = sqlite3_column_blob(stmt,0);
+                        if (b != NULL) memcpy(ent.parent_node.uuid,b,sizeof(ent.parent_node.uuid));
+                    }
+                }
+                /* name */
+                {
+                    const unsigned char *t = sqlite3_column_text(stmt,1);
+                    ent.name = (t != NULL) ? (char*)t : "";
+                }
+                /* real_name */
+                {
+                    int blobsz = sqlite3_column_bytes(stmt,2);
+                    const void *b = sqlite3_column_blob(stmt,2);
+                    if (blobsz > 0 && b != NULL) {
+                        ent.real_name.resize(blobsz);
+                        memcpy(&ent.real_name[0],b,blobsz);
+                    }
+                    else {
+                        ent.real_name.clear();
+                    }
+                }
+                /* name_charset */
+                {
+                    const unsigned char *t = sqlite3_column_text(stmt,3);
+                    ent.name_charset = (t != NULL) ? (char*)t : "";
+                }
+                /* size */
+                ent.size = sqlite3_column_int64(stmt,4);
+                /* type */
+                ent.type = sqlite3_column_int(stmt,5);
+                /* mime_string */
+                {
+                    const unsigned char *t = sqlite3_column_text(stmt,6);
+                    ent.mime_string = (t != NULL) ? (char*)t : "";
+                }
+                /* content_encoding */
+                {
+                    const unsigned char *t = sqlite3_column_text(stmt,7);
+                    ent.mime_string = (t != NULL) ? (char*)t : "";
+                }
+                /* flags */
+                ent.flags = sqlite3_column_int64(stmt,8);
+                /* mtime */
+                ent.mtime = sqlite3_column_int64(stmt,9);
+                /* inode */
+                ent.inode = sqlite3_column_int64(stmt,10);
+            }
+            results++;
+        }
+        else {
+            fprintf(stderr,"SQLITE statement error\n");
+            break;
+        }
+    } while(1);
+    sqlite3_finalize(stmt);
+
+    if (results > 0)
+        return true;
+
+    return false;
+}
+
 /* in: ent.name, ent.parent_node
  * out: ent.* */
 bool prl_node_db_add_fsentbyname(prl_node_entry &ent) {

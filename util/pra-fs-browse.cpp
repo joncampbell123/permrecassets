@@ -22,6 +22,8 @@
 
 using namespace std;
 
+static prl_node_entry parent_node;
+
 char read_char(void) {
 	char c = 0;
 
@@ -62,6 +64,10 @@ void editorLoop(void) {
         fprintf(stderr,"Unable to open SQLite3 DB. Use pra-fs-scan-db-init.sh\n");
         return;
     }
+
+    parent_node = prl_node_entry();
+    parent_node.node_id = prl_zero_node;
+    prl_node_db_lookup_by_node_id(parent_node);
 
 	tcgetattr(0/*STDIN*/,&omode);
 	mode = omode;
