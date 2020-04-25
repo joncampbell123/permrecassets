@@ -141,6 +141,22 @@ void editorLoop(void) {
 		}
 		else if (key == "\x1B[C") { /* right arrow */
 		}
+        else if (key == "\x0D" || key == "\x0A") { /* enter */
+            if (select >= 0 && (size_t)select < rlist.size()) {
+                parent_node = rlist[select];
+                prl_node_db_lookup_by_node_id(parent_node);
+                prl_node_db_lookup_children_of_parent(/*&r*/rlist,parent_node);
+                select = 0;
+                redraw = 1;
+            }
+        }
+        else if (key == "\x08" || key == "\x7F") { /* backspace */
+            parent_node.node_id = parent_node.parent_node;
+            prl_node_db_lookup_by_node_id(parent_node);
+            prl_node_db_lookup_children_of_parent(/*&r*/rlist,parent_node);
+            select = 0;
+            redraw = 1;
+        }
 	}
 
 	tcsetattr(0/*STDIN*/,TCSANOW,&omode);
