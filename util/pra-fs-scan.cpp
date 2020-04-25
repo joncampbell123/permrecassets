@@ -16,6 +16,7 @@
 #include "lib_prl_blob.h"
 #include "lib_prl_nodes.h"
 #include "lib_cpp_realpath.h"
+#include "lib_fs_isrdonly.h"
 
 using namespace std;
 
@@ -103,6 +104,28 @@ int main(int argc,char **argv) {
     if (!S_ISDIR(st.st_mode)) {
         fprintf(stderr,"Not a directory\n");
         return 1;
+    }
+
+    if (!prl_fs_readonly(argv[1])) {
+        if (isatty(0)) {
+            char resp[512];
+
+            printf("Filesystem should be readonly for safety reasons!\n");
+            printf("Type YES and hit ENTER to continue\n");
+
+            resp[0]=0;
+            fgets(resp,sizeof(resp),stdin);
+            if (!strncasecmp(resp,"yes",3)) {
+                /* OK */
+            }
+            else {
+                return 1;
+            }
+        }
+        else {
+            fprintf(stderr,"Filesystem must be read only for safety reasons\n");
+            return 1;
+        }
     }
 
     procmount_list_read(pml);
