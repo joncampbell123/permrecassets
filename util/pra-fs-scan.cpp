@@ -298,6 +298,8 @@ static void scan_dir(const path_rel_label &prl,const std::string &rpath,const pr
 
         if (lstat(filepath.c_str(),&st)) continue;
 
+        child_node.inode = st.st_ino;
+        child_node.mtime = st.st_mtime;
         child_node.parent_node = parent_node.node_id;
         child_node.real_name = std::string(d->d_name);
         child_node.name = d->d_name;
@@ -400,6 +402,8 @@ int main(int argc,char **argv) {
                 return 1;
             }
 
+            child_node.inode = st.st_ino;
+            child_node.mtime = st.st_mtime;
             child_node.type = NODE_TYPE_DIRECTORY;/*remember the above code MAKES SURE the path given is a directory*/
             child_node.parent_node = parent_node.node_id;
             child_node.real_name = (*i);
