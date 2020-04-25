@@ -1,4 +1,4 @@
-PROGS=mount-is-readonly mount-rel-path pra-fs-scan
+PROGS=mount-is-readonly mount-rel-path pra-fs-scan pra-fs-browse
 
 CXXFLAGS=-std=c++11 -Wall -Wextra -pedantic 
 LDFLAGS=
@@ -7,6 +7,7 @@ all: $(PROGS)
 
 install: $(PROGS)
 	mkdir -p $(DESTDIR)/usr/bin/
+	cp -v pra-fs-browse $(DESTDIR)/usr/bin/
 	cp -v mount-rel-path $(DESTDIR)/usr/bin/
 	cp -v mount-is-readonly $(DESTDIR)/usr/bin/
 	cp -v permasset-identify $(DESTDIR)/usr/bin/
@@ -35,6 +36,11 @@ lib_path_rel_label.o: lib_path_rel_label.cpp
 libpermrecassetutil.a: lib_procmount.o lib_path_rel_label.o lib_prluuid.o lib_splitpath.o lib_prl_nodes.o lib_cpp_realpath.o lib_fs_isrdonly.o
 	rm -f $@
 	ar r $@ $^
+
+pra-fs-browse: pra-fs-browse.o libpermrecassetutil.a
+	g++ $(LDFLAGS) -o $@ $^ -luuid `pkg-config --libs sqlite3`
+pra-fs-browse.o: pra-fs-browse.cpp
+	g++ $(CXXFLAGS) -c -o $@ $^ `pkg-config --cflags sqlite3`
 
 pra-fs-scan: pra-fs-scan.o libpermrecassetutil.a
 	g++ $(LDFLAGS) -o $@ $^ -luuid `pkg-config --libs sqlite3`
