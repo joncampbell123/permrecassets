@@ -118,6 +118,11 @@ void editorLoop(void) {
                 parent_node.name.c_str(),
                 rlist.size());
 
+            if (scroll > select)
+                scroll = select;
+            if (scroll < (select-(sheight-3)))
+                scroll = (select-(sheight-3));
+
             for (int s=0;(s+2) < sheight;s++) {
                 if ((size_t)(s+scroll) < rlist.size()) {
                     const char *typ = "?";
