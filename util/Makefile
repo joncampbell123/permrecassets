@@ -30,9 +30,9 @@ libpermrecassetutil.a: lib_procmount.o lib_path_rel_label.o lib_prluuid.o lib_sp
 	ar r $@ $^
 
 pra-fs-scan: pra-fs-scan.o libpermrecassetutil.a
-	g++ $(LDFLAGS) -o $@ $^ -luuid
+	g++ $(LDFLAGS) -o $@ $^ -luuid `pkg-config --libs sqlite3`
 pra-fs-scan.o: pra-fs-scan.cpp
-	g++ $(CXXFLAGS) -c -o $@ $^
+	g++ $(CXXFLAGS) -c -o $@ $^ `pkg-config --cflags sqlite3`
 
 mount-is-readonly: mount-is-readonly.o
 	g++ $(LDFLAGS) -o $@ $^

@@ -14,6 +14,8 @@
 #include "lib_prluuid.h"
 #include "lib_splitpath.h"
 
+#include <sqlite3.h>
+
 using namespace std;
 
 const prluuid prl_zero_node = { 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0 };
@@ -71,6 +73,24 @@ struct prl_node_entry {
     prl_node_entry() : size(0),type(0),flags(0),index(0),mtime(0),inode(0) { }
     ~prl_node_entry() { }
 };
+
+sqlite3* prl_node_db_sqlite = NULL;
+
+bool prl_node_db_open(void) {
+    if (prl_node_db_sqlite == NULL) {
+        if (sqlite3_open_v2("pra-fs-scan.db",&prl_node_db_sqlite,SQLITE_OPEN_READWRITE|SQLITE_OPEN_FULLMUTEX/*|SQLITE_OPEN_NOFOLLOW*/,NULL) != SQLITE_OK)
+            return false;
+    }
+
+    return true;
+}
+
+void prl_node_db_close(void) {
+    if (prl_node_db_sqlite != NULL) {
+        sqlite3_close_v2(prl_node_db_sqlite);
+        prl_node_db_sqlite = NULL;
+    }
+}
 
 /* in: name
  * out: ent */
@@ -203,8 +223,14 @@ int main(int argc,char **argv) {
         return 1;
     }
 
+    if (!prl_node_db_open()) {
+        fprintf(stderr,"Unable to open SQLite3 DB. Use pra-fs-scan-db-init.sh\n");
+        return 1;
+    }
+
     if (!prl_node_db_add_archive(/*&return*/parent_node,prl.fs_label)) {
         fprintf(stderr,"Failed to add or update archive node\n");
+        prl_node_db_close();
         return 1;
     }
 
@@ -215,6 +241,7 @@ int main(int argc,char **argv) {
 
         if (cpp_realpath(rpath) != rpath) {
             fprintf(stderr,"Realpath failure for %s (207)\n",rpath.c_str());
+            prl_node_db_close();
             return 1;
         }
 
@@ -224,6 +251,7 @@ int main(int argc,char **argv) {
 
             if (lstat(rpath.c_str(),&st) || !S_ISDIR(st.st_mode)) {
                 fprintf(stderr,"rpath dir verification fail\n");
+                prl_node_db_close();
                 return 1;
             }
 
@@ -234,6 +262,7 @@ int main(int argc,char **argv) {
 
             if (!prl_node_db_add_fsentbyname(/*in&out*/child_node)) {
                 fprintf(stderr,"Failed to add or update fs node\n");
+                prl_node_db_close();
                 return 1;
             }
 
@@ -242,6 +271,7 @@ int main(int argc,char **argv) {
 
             if (cpp_realpath(rpath) != rpath) {
                 fprintf(stderr,"Realpath failure for %s (234)\n",rpath.c_str());
+                prl_node_db_close();
                 return 1;
             }
 
@@ -253,6 +283,7 @@ int main(int argc,char **argv) {
     /* scandir */
     scan_dir(prl,prl.relpath,parent_node);
 
+    prl_node_db_close();
     return 0;
 }
 
