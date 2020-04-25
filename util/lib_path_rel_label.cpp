@@ -15,6 +15,7 @@
 
 #include "lib_procmount.h"
 #include "lib_path_rel_label.h"
+#include "lib_prl_udev.h"
 
 using namespace std;
 
@@ -59,7 +60,7 @@ static bool path_to_prl_inner(const procmount_list &pml,path_rel_label &prl,cons
                 char *rpath = realpath(path.c_str(),NULL);
                 if (rpath != NULL) {
                     if (prl.device == rpath) {
-                        prl.fs_label = d->d_name;
+                        prl.fs_label = prl_udev_unescape(d->d_name); /* apparently udev escapes spaces and other unusual characters i.e. ' ' = \x20 */
                     }
                     free(rpath);
                 }
