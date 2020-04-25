@@ -421,3 +421,22 @@ bool prl_node_db_add_fsentbyname(prl_node_entry &ent) {
     return true;
 }
 
+bool prl_node_db_lookup_node_tree_path(std::vector<prl_node_entry> &plist,prl_node_entry &pent) {
+    plist.clear();
+
+    std::vector<prl_node_entry> tmp;
+    prl_node_entry search = pent;
+
+    while (memcmp(search.node_id.uuid,prl_zero_node.uuid,sizeof(prl_zero_node.uuid)) != 0) {
+        tmp.push_back(search);
+
+        search.node_id = search.parent_node;
+        if (!prl_node_db_lookup_by_node_id(search)) break;
+    }
+
+    for (std::vector<prl_node_entry>::reverse_iterator i=tmp.rbegin();i!=tmp.rend();i++)
+        plist.push_back(*i);
+
+    return true;
+}
+
