@@ -100,6 +100,8 @@ void editorLoop(void) {
     std::vector<prl_node_entry> rlist;
     std::string key;
 
+    (void)swidth;
+
     if (!prl_node_db_open_ro()) {
         fprintf(stderr,"Unable to open SQLite3 DB. Use pra-fs-scan-db-init.sh\n");
         return;
@@ -228,7 +230,7 @@ void editorLoop(void) {
     prl_node_db_close();
 }
 
-int main(int argc,char **argv) {
+int main(int /*argc*/,char * * /*argv*/) {
 	editorLoop();
 	return 0;
 }
