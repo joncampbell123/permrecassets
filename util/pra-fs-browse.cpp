@@ -24,6 +24,9 @@ using namespace std;
 
 static prl_node_entry parent_node;
 
+int sheight = 25;
+int swidth = 80;
+
 char read_char(void) {
 	char c = 0;
 
@@ -88,8 +91,6 @@ std::string file_size_human_friendly(uint64_t sz) {
 }
 
 void editorLoop(void) {
-    int sheight = 25;
-    int swidth = 80;
     int listtop = 3;
     int listheight = 22;
 	unsigned char run = 1;
