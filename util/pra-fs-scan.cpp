@@ -13,12 +13,11 @@
 #include "lib_path_rel_label.h"
 #include "lib_prluuid.h"
 #include "lib_splitpath.h"
+#include "lib_prl_nodes.h"
 
 #include <sqlite3.h>
 
 using namespace std;
-
-const prluuid prl_zero_node = { 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0 };
 
 // TODO: Just make this code C++11 so we can use "using" instead of this mess
 typedef std::vector<uint8_t> prl_blob_base;
