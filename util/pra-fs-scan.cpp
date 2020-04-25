@@ -204,6 +204,9 @@ static void scan_dir(const path_rel_label &prl,const std::string &rpath,const pr
     dir = opendir(fpath.c_str());
     if (dir == NULL) return;
 
+    printf("\x0D" "%s" "\x1B[J",rpath.c_str());
+    fflush(stdout);
+
     while ((d=readdir(dir)) != NULL) {
         if (!strcmp(d->d_name,".") || !strcmp(d->d_name,".."))
             continue;
@@ -245,6 +248,9 @@ static void scan_dir(const path_rel_label &prl,const std::string &rpath,const pr
     }
 
     closedir(dir);
+
+    printf("\x0D" "\x1B[J");
+    fflush(stdout);
 }
 
 int main(int argc,char **argv) {
