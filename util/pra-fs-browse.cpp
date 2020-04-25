@@ -142,13 +142,22 @@ void filesearchloop(const std::string &query) {
 	unsigned char redraw = 1;
     int select = 0;
     int scroll = 0;
+    std::vector<prl_node_entry> place;
     std::vector<prl_node_entry> rlist;
+    int place_select = -1;
     std::string key;
 
     prl_node_db_lookup_file_query(/*&r*/rlist,query);
 
 	while (run) {
 		if (redraw) {
+            if (place_select != select) { /* a form of caching... */
+                if (select >= 0 && select < (int)rlist.size())
+                    prl_node_db_lookup_node_tree_path(/*&*/place,rlist[select]);
+                else
+                    place.clear();
+            }
+
             /* erase screen, home cursor */
             printf("\x1B[0m");
             printf("\x1B[2J" "\x1B[H"); fflush(stdout);
@@ -156,6 +165,14 @@ void filesearchloop(const std::string &query) {
             printf("\x1B[1;1H" "Search results for '%s'\n",query.c_str());
 
             if (rlist.empty()) printf("\n(none)\n");
+
+            printf("\x1B[3;1H");
+            for (std::vector<prl_node_entry>::iterator i=place.begin();i!=place.end();i++) {
+                prl_node_entry &ent = *i;
+
+                printf("%s > ",ent.name.c_str());
+            }
+            printf("\n");
 
             listtop = 5;
             listheight = sheight - (listtop-1);
