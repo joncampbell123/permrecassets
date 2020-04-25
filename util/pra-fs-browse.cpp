@@ -156,6 +156,8 @@ void filesearchloop(const std::string &query) {
                     prl_node_db_lookup_node_tree_path(/*&*/place,rlist[select]);
                 else
                     place.clear();
+
+                place_select = select;
             }
 
             /* erase screen, home cursor */
@@ -260,6 +262,7 @@ void filesearchloop(const std::string &query) {
                     parent_node = rlist[select];
                 }
 
+                place_select = -1;
                 prl_node_db_lookup_by_node_id(parent_node);
                 browseloop();
                 select = 0;
