@@ -54,6 +54,33 @@ std::string read_in(void) {
 	return ret;
 }
 
+std::string file_size_human_friendly(uint64_t sz) {
+    const char *suffix = "B";
+    uint64_t frac = 0;
+    char tmp[128];
+
+    if (sz >= (uint64_t)1024ull) {
+        frac = sz & (uint64_t)1023ull;
+        sz >>= (uint64_t)10ull;
+        suffix = "KB";
+    }
+
+    if (sz >= (uint64_t)1024ull) {
+        frac = sz & (uint64_t)1023ull;
+        sz >>= (uint64_t)10ull;
+        suffix = "MB";
+    }
+
+    if (sz >= (uint64_t)1024ull) {
+        frac = sz & (uint64_t)1023ull;
+        sz >>= (uint64_t)10ull;
+        suffix = "GB";
+    }
+
+    sprintf(tmp,"%llu.%llu",(unsigned long long)sz,(frac * 1000ull) / 1024ull);
+    return std::string(tmp) + suffix;
+}
+
 void editorLoop(void) {
     int sheight = 25;
     int swidth = 80;
@@ -109,7 +136,9 @@ void editorLoop(void) {
                     else
                         printf("\x1B[0m");
 
-                    printf("\x1B[%d;1H" "%s: '%s' (%s)" "\x1B[0K",s+1+2,ent.node_id.to_string().c_str(),ent.name.c_str(),typ);
+                    printf("\x1B[%d;1H" "%s: '%s' (%s)",s+1+2,ent.node_id.to_string().c_str(),ent.name.c_str(),typ);
+                    if (ent.type == NODE_TYPE_FILE) printf(" %s",file_size_human_friendly(ent.size).c_str());
+                    printf("\x1B[0K");
                     fflush(stdout);
                 }
             }
