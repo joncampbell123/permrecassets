@@ -139,8 +139,11 @@ void editorLoop(void) {
                     printf("\x1B[%d;1H" "%-5s",s+1+2,typ);
                     if (ent.type == NODE_TYPE_FILE) printf(" %10s",file_size_human_friendly(ent.size).c_str());
                     else                            printf("           ");
-                    printf(" %s",ent.name.c_str());
+                    printf(" ");
+                    printf("\x1B[1m");
+                    printf("%s",ent.name.c_str());
                     printf("\x1B[0K");
+                    printf("\x1B[0m");
                     fflush(stdout);
                 }
             }
