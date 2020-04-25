@@ -24,6 +24,18 @@ const prluuid prl_zero_node = { 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0
 
 static sqlite3* prl_node_db_sqlite = NULL;
 
+bool prl_node_db_open_ro(void) {
+    if (prl_node_db_sqlite == NULL) {
+        if (sqlite3_open_v2("pra-fs-scan.db",&prl_node_db_sqlite,SQLITE_OPEN_READONLY|SQLITE_OPEN_FULLMUTEX/*|SQLITE_OPEN_NOFOLLOW*/,NULL) != SQLITE_OK)
+            return false;
+
+        if (sqlite3_exec(prl_node_db_sqlite,"PRAGMA synchronous = 0;",NULL,NULL,NULL) != SQLITE_OK)
+            fprintf(stderr,"PRAGMA synchronous failed\n");
+    }
+
+    return true;
+}
+
 bool prl_node_db_open(void) {
     if (prl_node_db_sqlite == NULL) {
         if (sqlite3_open_v2("pra-fs-scan.db",&prl_node_db_sqlite,SQLITE_OPEN_READWRITE|SQLITE_OPEN_FULLMUTEX/*|SQLITE_OPEN_NOFOLLOW*/,NULL) != SQLITE_OK)

@@ -47,6 +47,7 @@ struct prl_node_entry {
 
 bool prl_node_db_open(void);
 void prl_node_db_close(void);
+bool prl_node_db_open_ro(void);
 bool prl_node_db_add_fsentbyname(prl_node_entry &ent);
 
 #endif /*UTIL_LIB_PRL_NODES_H*/
