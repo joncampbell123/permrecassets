@@ -65,7 +65,7 @@ bool prl_node_db_lookup_children_of_parent(std::vector<prl_node_entry> &rlist,pr
     rlist.clear();
 
     /*                                                0           1    2         3            4    5    6           7                8     9     10 */
-    if (sqlite3_prepare_v2(prl_node_db_sqlite,"SELECT node_id,name,real_name,name_charset,size,type,mime_string,content_encoding,flags,mtime,inode FROM nodes WHERE parent_node = ? LIMIT 1000;",-1,&stmt,&pztail) != SQLITE_OK) {
+    if (sqlite3_prepare_v2(prl_node_db_sqlite,"SELECT node_id,name,real_name,name_charset,size,type,mime_string,content_encoding,flags,mtime,inode FROM nodes WHERE parent_node = ? ORDER BY name ASC;",-1,&stmt,&pztail) != SQLITE_OK) {
         fprintf(stderr,"db_add_archive statement prepare failed\n");
         return false;
     }
