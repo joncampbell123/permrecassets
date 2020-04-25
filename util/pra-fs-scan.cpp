@@ -95,15 +95,83 @@ void prl_node_db_close(void) {
 /* in: name
  * out: ent */
 bool prl_node_db_add_archive(prl_node_entry &ent,const std::string &name) {
+    sqlite3_stmt* stmt = NULL;
+    const char* pztail = NULL;
+    int results,sr;
+
     /* add node with parent_node == zero_node, name = name, type = ARCHIVE.
      * If already exists, return without changing. */
-    prluuidgen(ent.node_id);
+    /*                                                1                                                               */
+    /*                                                                             1                   2            3 */
+    if (sqlite3_prepare_v2(prl_node_db_sqlite,"SELECT node_id FROM nodes WHERE name = ? AND parent_node = ? AND type = ? LIMIT 1;",-1,&stmt,&pztail) != SQLITE_OK) {
+        fprintf(stderr,"db_add_archive statement prepare failed\n");
+        return false;
+    }
+    results = 0;
+    sqlite3_bind_text(stmt,1,name.c_str(),-1,NULL);/*name*/
+    sqlite3_bind_blob(stmt,2,prl_zero_node.uuid,sizeof(prl_zero_node.uuid),NULL);/*parent_node*/
+    sqlite3_bind_int(stmt,3,NODE_TYPE_ARCHIVE);/*type*/
+    do {
+        sr = sqlite3_step(stmt);
+        if (sr == SQLITE_BUSY) continue;
+        else if (sr == SQLITE_DONE) break;
+        else if (sr == SQLITE_ROW) {
+            if (results == 0) {
+                int blobsz = sqlite3_column_bytes(stmt,0);
+                if (blobsz == sizeof(ent.node_id.uuid)) {
+                    const void *b = sqlite3_column_blob(stmt,0);
+                    if (b != NULL) memcpy(ent.node_id.uuid,b,sizeof(ent.node_id.uuid));
+                }
+            }
+            results++;
+        }
+        else {
+            fprintf(stderr,"SQLITE statement error\n");
+            break;
+        }
+    } while(1);
+    sqlite3_finalize(stmt);
+
     ent.parent_node = prl_zero_node;
     ent.name = name;
     ent.real_name = name;
     ent.size = 0;
     ent.type = NODE_TYPE_ARCHIVE;
-    fprintf(stderr,"DEBUG: Add archive '%s' return node_id '%s'\n",name.c_str(),ent.node_id.to_string().c_str());
+
+    if (results > 0) {
+        fprintf(stderr,"DEBUG: Archive node already there\n");
+        /* already there, nothing to do. The code updated node_id */
+        return true;
+    }
+
+    prluuidgen(ent.node_id);
+
+    if (sqlite3_prepare_v2(prl_node_db_sqlite,"INSERT INTO nodes (node_id,parent_node,name,real_name,size,type) VALUES(?,?,?,?,?,?);",-1,&stmt,&pztail) != SQLITE_OK) {
+        fprintf(stderr,"db_add_archive insert statement prepare failed\n");
+        return false;
+    }
+    results = 0;
+    sqlite3_bind_blob(stmt,1,ent.node_id.uuid,sizeof(ent.node_id.uuid),NULL);/*node_id*/
+    sqlite3_bind_blob(stmt,2,ent.parent_node.uuid,sizeof(ent.parent_node.uuid),NULL);/*parent_node*/
+    sqlite3_bind_text(stmt,3,ent.name.c_str(),-1,NULL);/*name*/
+    sqlite3_bind_blob(stmt,4,&ent.real_name[0],ent.real_name.size(),NULL);/*real_name*/
+    sqlite3_bind_int64(stmt,5,ent.size);/*size*/
+    sqlite3_bind_int(stmt,6,ent.type);/*type*/
+    do {
+        sr = sqlite3_step(stmt);
+        if (sr == SQLITE_BUSY) continue;
+        else if (sr == SQLITE_DONE) {
+            results++;
+            break;
+        }
+        else {
+            fprintf(stderr,"SQLITE statement error\n");
+            break;
+        }
+    } while(1);
+    sqlite3_finalize(stmt);
+    if (results == 0) return false;
+
     return true;
 }
 
