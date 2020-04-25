@@ -176,6 +176,17 @@ void editorLoop(void) {
                 redraw = 1;
             }
 		}
+        else if (key == "\x1B[5~") { /* page up */
+            select -= sheight - 3;
+            if (select < 0) select = 0;
+            redraw = 1;
+        }
+        else if (key == "\x1B[6~") { /* page down */
+            select += sheight - 3;
+            if (select >= (int)rlist.size()) select = (int)rlist.size() - 1;
+            if (select < 0) select = 0;
+            redraw = 1;
+        }
 		else if (key == "\x1B[D") { /* left arrow */
 		}
 		else if (key == "\x1B[C") { /* right arrow */
