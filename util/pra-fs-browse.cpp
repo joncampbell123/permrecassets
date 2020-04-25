@@ -157,8 +157,8 @@ void filesearchloop(const std::string &query) {
 
             if (rlist.empty()) printf("\n(none)\n");
 
-            listtop = 3;
-            listheight = sheight - 4;
+            listtop = 5;
+            listheight = sheight - (listtop-1);
 
             if (scroll > select)
                 scroll = select;
@@ -282,8 +282,8 @@ void browseloop(void) {
                 parent_node.name.c_str(),
                 rlist.size());
 
-            listtop = 3;
-            listheight = sheight - 2;
+            listtop = 5;
+            listheight = sheight - (listtop-1);
 
             if (scroll > select)
                 scroll = select;
