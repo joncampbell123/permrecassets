@@ -258,6 +258,25 @@ void filesearchloop(const std::string &query) {
 	printf("\x1B[2J" "\x1B[H"); fflush(stdout);
 }
 
+bool prl_node_db_lookup_node_tree_path(std::vector<prl_node_entry> &plist,prl_node_entry &pent) {
+    plist.clear();
+
+    std::vector<prl_node_entry> tmp;
+    prl_node_entry search = pent;
+
+    while (memcmp(search.node_id.uuid,prl_zero_node.uuid,sizeof(prl_zero_node.uuid)) != 0) {
+        tmp.push_back(search);
+
+        search.node_id = search.parent_node;
+        if (!prl_node_db_lookup_by_node_id(search)) break;
+    }
+
+    for (std::vector<prl_node_entry>::reverse_iterator i=tmp.rbegin();i!=tmp.rend();i++)
+        plist.push_back(*i);
+
+    return true;
+}
+
 void browseloop(void) {
     int listtop = 3;
     int listheight = 22;
@@ -265,10 +284,12 @@ void browseloop(void) {
 	unsigned char redraw = 1;
     int select = 0;
     int scroll = 0;
+    std::vector<prl_node_entry> place;
     std::vector<prl_node_entry> rlist;
     std::string key;
 
     prl_node_db_lookup_by_node_id(parent_node);
+    prl_node_db_lookup_node_tree_path(/*&*/place,parent_node);
     prl_node_db_lookup_children_of_parent(/*&r*/rlist,parent_node);
 
 	while (run) {
@@ -281,6 +302,14 @@ void browseloop(void) {
                 parent_node.node_id.to_string().c_str(),
                 parent_node.name.c_str(),
                 rlist.size());
+
+            printf("\x1B[3;1H");
+            for (std::vector<prl_node_entry>::iterator i=place.begin();i!=place.end();i++) {
+                prl_node_entry &ent = *i;
+
+                printf("%s > ",ent.name.c_str());
+            }
+            printf("\n");
 
             listtop = 5;
             listheight = sheight - (listtop-1);
@@ -362,6 +391,7 @@ void browseloop(void) {
             if (select >= 0 && (size_t)select < rlist.size()) {
                 parent_node = rlist[select];
                 prl_node_db_lookup_by_node_id(parent_node);
+                prl_node_db_lookup_node_tree_path(/*&*/place,parent_node);
                 prl_node_db_lookup_children_of_parent(/*&r*/rlist,parent_node);
                 select = 0;
                 redraw = 1;
@@ -370,6 +400,7 @@ void browseloop(void) {
         else if (key == "\x08" || key == "\x7F") { /* backspace */
             parent_node.node_id = parent_node.parent_node;
             prl_node_db_lookup_by_node_id(parent_node);
+            prl_node_db_lookup_node_tree_path(/*&*/place,parent_node);
             prl_node_db_lookup_children_of_parent(/*&r*/rlist,parent_node);
             select = 0;
             redraw = 1;
