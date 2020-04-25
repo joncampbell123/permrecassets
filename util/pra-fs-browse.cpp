@@ -126,7 +126,7 @@ void editorLoop(void) {
                     switch (ent.type) {
                         case NODE_TYPE_FILE:        typ = "File"; break;
                         case NODE_TYPE_DIRECTORY:   typ = "Dir"; break;
-                        case NODE_TYPE_ARCHIVE:     typ = "Archive"; break;
+                        case NODE_TYPE_ARCHIVE:     typ = "Arch"; break;
                         case NODE_TYPE_VIEW:        typ = "View"; break;
                         default:                    typ = "?"; break;
                     };
@@ -136,8 +136,10 @@ void editorLoop(void) {
                     else
                         printf("\x1B[0m");
 
-                    printf("\x1B[%d;1H" "%s: '%s' (%s)",s+1+2,ent.node_id.to_string().c_str(),ent.name.c_str(),typ);
-                    if (ent.type == NODE_TYPE_FILE) printf(" %s",file_size_human_friendly(ent.size).c_str());
+                    printf("\x1B[%d;1H" "%-5s",s+1+2,typ);
+                    if (ent.type == NODE_TYPE_FILE) printf(" %10s",file_size_human_friendly(ent.size).c_str());
+                    else                            printf("           ");
+                    printf(" %s",ent.name.c_str());
                     printf("\x1B[0K");
                     fflush(stdout);
                 }
