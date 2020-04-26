@@ -19,7 +19,5 @@ CREATE        INDEX IF NOT EXISTS nodes_parent_node ON nodes(parent_node);
 CREATE        INDEX IF NOT EXISTS nodes_name ON nodes(name);
 CREATE        INDEX IF NOT EXISTS nodes_real_name ON nodes(real_name);
 CREATE        INDEX IF NOT EXISTS nodes_name_charset ON nodes(name_charset) WHERE name_charset IS NOT NULL;
-CREATE        INDEX IF NOT EXISTS nodes_type ON nodes(type);
-CREATE        INDEX IF NOT EXISTS nodes_inode ON nodes(inode) WHERE inode IS NOT NULL;
 _EOF
 
