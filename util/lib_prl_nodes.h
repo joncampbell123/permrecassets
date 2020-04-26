@@ -54,5 +54,8 @@ bool prl_node_db_lookup_file_query(std::vector<prl_node_entry> &rlist,const std:
 bool prl_node_db_lookup_node_tree_path(std::vector<prl_node_entry> &plist,prl_node_entry &pent);
 bool prl_node_db_lookup_children_of_parent(std::vector<prl_node_entry> &rlist,prl_node_entry &pent);
 
+std::string prl_archive_sort_func_filter(const std::string &s);
+bool prl_archive_sort_func(const prl_node_entry &a,const prl_node_entry &b);
+
 #endif /*UTIL_LIB_PRL_NODES_H*/
 

@@ -280,25 +280,6 @@ void filesearchloop(const std::string &query) {
 	printf("\x1B[2J" "\x1B[H"); fflush(stdout);
 }
 
-std::string prl_archive_sort_func_filter(const string &s) {
-    string r = s;
-
-    if (r.length() >= 4) {
-        if (r[0] == 'J' && r[1] == 'M' && r[2] == 'C') {
-            if (r[3] == '-') r[3] = ' ';
-        }
-    }
-
-    return r;
-}
-
-bool prl_archive_sort_func(const prl_node_entry &a,const prl_node_entry &b) {
-    /* 'JMC-' or 'JMC ' need to be treated the same */
-    string sa = prl_archive_sort_func_filter(a.name);
-    string sb = prl_archive_sort_func_filter(b.name);
-    return sa < sb;
-}
-
 void browseloop(void) {
     int listtop = 3;
     int listheight = 22;
