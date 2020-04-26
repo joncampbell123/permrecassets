@@ -76,6 +76,9 @@ static void scan_dir(const path_rel_label &prl,const std::string &rpath,const pr
 
         if (S_ISDIR(st.st_mode)) {
             scan_dir(prl,rpath + (rpath.empty() ? "" : "/") + d->d_name,child_node); /* child node becomes parent later */
+
+            printf("\x0D" "%s" "\x1B[K",rpath.c_str());
+            fflush(stdout);
         }
     }
 
