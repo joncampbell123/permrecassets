@@ -20,6 +20,8 @@
 #include "lib_cpp_realpath.h"
 #include "lib_fs_isrdonly.h"
 
+#include <algorithm>
+
 using namespace std;
 
 static prl_node_entry parent_node;
@@ -278,6 +280,25 @@ void filesearchloop(const std::string &query) {
 	printf("\x1B[2J" "\x1B[H"); fflush(stdout);
 }
 
+std::string archive_sort_func_filter(const string &s) {
+    string r = s;
+
+    if (r.length() >= 4) {
+        if (r[0] == 'J' && r[1] == 'M' && r[2] == 'C') {
+            if (r[3] == '-') r[3] = ' ';
+        }
+    }
+
+    return r;
+}
+
+bool archive_sort_func(const prl_node_entry &a,const prl_node_entry &b) {
+    /* 'JMC-' or 'JMC ' need to be treated the same */
+    string sa = archive_sort_func_filter(a.name);
+    string sb = archive_sort_func_filter(b.name);
+    return sa < sb;
+}
+
 void browseloop(void) {
     int listtop = 3;
     int listheight = 22;
@@ -292,6 +313,13 @@ void browseloop(void) {
     prl_node_db_lookup_by_node_id(parent_node);
     prl_node_db_lookup_node_tree_path(/*&*/place,parent_node);
     prl_node_db_lookup_children_of_parent(/*&r*/rlist,parent_node);
+
+    if (!memcmp(parent_node.node_id.uuid,prl_zero_node.uuid,sizeof(prl_zero_node.uuid))) {
+        /* Some archives take the form JMC YYYY-MM-DD and some JMC-YYYY-MM-DD.
+         * To maintain chronological order, re-sort without considering the hyphen, or
+         * better yet, matching first the JMC- or J- and then the YYYY-MM-DD. */
+        std::sort(rlist.begin(),rlist.end(),archive_sort_func);
+    }
 
 	while (run) {
 		if (redraw) {
