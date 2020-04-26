@@ -280,7 +280,7 @@ void filesearchloop(const std::string &query) {
 	printf("\x1B[2J" "\x1B[H"); fflush(stdout);
 }
 
-std::string archive_sort_func_filter(const string &s) {
+std::string prl_archive_sort_func_filter(const string &s) {
     string r = s;
 
     if (r.length() >= 4) {
@@ -292,10 +292,10 @@ std::string archive_sort_func_filter(const string &s) {
     return r;
 }
 
-bool archive_sort_func(const prl_node_entry &a,const prl_node_entry &b) {
+bool prl_archive_sort_func(const prl_node_entry &a,const prl_node_entry &b) {
     /* 'JMC-' or 'JMC ' need to be treated the same */
-    string sa = archive_sort_func_filter(a.name);
-    string sb = archive_sort_func_filter(b.name);
+    string sa = prl_archive_sort_func_filter(a.name);
+    string sb = prl_archive_sort_func_filter(b.name);
     return sa < sb;
 }
 
@@ -314,11 +314,11 @@ void browseloop(void) {
     prl_node_db_lookup_node_tree_path(/*&*/place,parent_node);
     prl_node_db_lookup_children_of_parent(/*&r*/rlist,parent_node);
 
-    if (!memcmp(parent_node.node_id.uuid,prl_zero_node.uuid,sizeof(prl_zero_node.uuid))) {
+    if (parent_node.type == NODE_TYPE_ARCHIVE_COLLECTION || !memcmp(parent_node.node_id.uuid,prl_zero_node.uuid,sizeof(prl_zero_node.uuid))) {
         /* Some archives take the form JMC YYYY-MM-DD and some JMC-YYYY-MM-DD.
          * To maintain chronological order, re-sort without considering the hyphen, or
          * better yet, matching first the JMC- or J- and then the YYYY-MM-DD. */
-        std::sort(rlist.begin(),rlist.end(),archive_sort_func);
+        std::sort(rlist.begin(),rlist.end(),prl_archive_sort_func);
     }
 
 	while (run) {
