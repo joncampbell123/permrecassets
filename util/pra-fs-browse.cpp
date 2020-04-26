@@ -20,8 +20,6 @@
 #include "lib_cpp_realpath.h"
 #include "lib_fs_isrdonly.h"
 
-#include <algorithm>
-
 using namespace std;
 
 static prl_node_entry parent_node;
@@ -294,13 +292,6 @@ void browseloop(void) {
     prl_node_db_lookup_by_node_id(parent_node);
     prl_node_db_lookup_node_tree_path(/*&*/place,parent_node);
     prl_node_db_lookup_children_of_parent(/*&r*/rlist,parent_node);
-
-    if (parent_node.type == NODE_TYPE_ARCHIVE_COLLECTION || !memcmp(parent_node.node_id.uuid,prl_zero_node.uuid,sizeof(prl_zero_node.uuid))) {
-        /* Some archives take the form JMC YYYY-MM-DD and some JMC-YYYY-MM-DD.
-         * To maintain chronological order, re-sort without considering the hyphen, or
-         * better yet, matching first the JMC- or J- and then the YYYY-MM-DD. */
-        std::sort(rlist.begin(),rlist.end(),prl_archive_sort_func);
-    }
 
 	while (run) {
 		if (redraw) {

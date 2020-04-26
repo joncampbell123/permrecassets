@@ -18,6 +18,8 @@
 
 #include <sqlite3.h>
 
+#include <algorithm>
+
 using namespace std;
 
 const prluuid prl_zero_node = { 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0 };
@@ -247,6 +249,13 @@ bool prl_node_db_lookup_children_of_parent(std::vector<prl_node_entry> &rlist,pr
         }
     } while(1);
     sqlite3_finalize(stmt);
+
+    if (pent.type == NODE_TYPE_ARCHIVE_COLLECTION || !memcmp(pent.node_id.uuid,prl_zero_node.uuid,sizeof(prl_zero_node.uuid))) {
+        /* Some archives take the form JMC YYYY-MM-DD and some JMC-YYYY-MM-DD.
+         * To maintain chronological order, re-sort without considering the hyphen, or
+         * better yet, matching first the JMC- or J- and then the YYYY-MM-DD. */
+        std::sort(rlist.begin(),rlist.end(),prl_archive_sort_func);
+    }
 
     if (results >= 0)
         return true;
