@@ -45,9 +45,6 @@ bool prl_node_db_open(void) {
 
         if (sqlite3_exec(prl_node_db_sqlite,"PRAGMA synchronous = 0;",NULL,NULL,NULL) != SQLITE_OK)
             fprintf(stderr,"PRAGMA synchronous failed\n");
-
-        if (sqlite3_exec(prl_node_db_sqlite,"PRAGMA wal_autocheckpoint = 100;",NULL,NULL,NULL) != SQLITE_OK)
-            fprintf(stderr,"PRAGMA synchronous failed\n");
     }
 
     return true;
