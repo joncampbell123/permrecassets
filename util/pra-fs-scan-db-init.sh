@@ -18,7 +18,6 @@ CREATE UNIQUE INDEX IF NOT EXISTS nodes_node_id ON nodes(node_id);
 CREATE        INDEX IF NOT EXISTS nodes_parent_node ON nodes(parent_node);
 CREATE        INDEX IF NOT EXISTS nodes_name ON nodes(name);
 CREATE        INDEX IF NOT EXISTS nodes_real_name ON nodes(real_name);
-CREATE        INDEX IF NOT EXISTS nodes_name_charset ON nodes(name_charset) WHERE name_charset IS NOT NULL;
 PRAGMA journal_mode = WAL;
 _EOF
 
