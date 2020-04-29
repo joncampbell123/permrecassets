@@ -52,7 +52,7 @@ static void scan_dir(const path_rel_label &prl,const std::string &rpath,const pr
 
         ct = time(NULL);
         if (pt != ct) {
-            printf("\x0D" "%s" "\x1B[K",filepath.c_str());
+            printf("\x0D" "%s/%s" "\x1B[K",rpath.c_str(),d->d_name);
             fflush(stdout);
             pt = ct;
         }
@@ -95,7 +95,7 @@ static void scan_dir(const path_rel_label &prl,const std::string &rpath,const pr
 
         ct = time(NULL);
         if (pt != ct) {
-            printf("\x0D" "%s" "\x1B[K",filepath.c_str());
+            printf("\x0D" "%s/%s" "\x1B[K",rpath.c_str(),d->d_name);
             fflush(stdout);
             pt = ct;
         }
