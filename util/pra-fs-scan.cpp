@@ -25,6 +25,7 @@ static void scan_dir(const path_rel_label &prl,const std::string &rpath,const pr
     prl_node_entry child_node;
     struct dirent *d;
     struct stat st;
+    time_t pt=0,ct;
     DIR *dir;
 
     std::string ver;
@@ -46,6 +47,13 @@ static void scan_dir(const path_rel_label &prl,const std::string &rpath,const pr
         const std::string filepath = fpath + "/" + d->d_name;
 
         if (lstat(filepath.c_str(),&st)) continue;
+
+        ct = time(NULL);
+        if (pt != ct) {
+            printf("\x0D" "%s" "\x1B[K",filepath.c_str());
+            fflush(stdout);
+            pt = ct;
+        }
 
         child_node.inode = st.st_ino;
         child_node.mtime = st.st_mtime;
