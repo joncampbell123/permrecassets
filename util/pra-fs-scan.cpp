@@ -50,6 +50,7 @@ static void scan_dir(const path_rel_label &prl,const std::string &rpath,const pr
         child_node.inode = st.st_ino;
         child_node.mtime = st.st_mtime;
         child_node.name_charset = "UTF-8";/*I always use UTF-8 for archives and the local fs */
+        child_node.assume_not_exist = parent_node.this_node_did_not_exist;
         child_node.parent_node = parent_node.node_id;
         child_node.real_name = std::string(d->d_name);
         child_node.name = d->d_name;
@@ -190,6 +191,7 @@ int main(int argc,char **argv) {
             child_node.mtime = st.st_mtime;
             child_node.name_charset = "UTF-8";/*I always use UTF-8 for archives and the local fs */
             child_node.type = NODE_TYPE_DIRECTORY;/*remember the above code MAKES SURE the path given is a directory*/
+            child_node.assume_not_exist = parent_node.this_node_did_not_exist;
             child_node.parent_node = parent_node.node_id;
             child_node.real_name = (*i);
             child_node.name = (*i);

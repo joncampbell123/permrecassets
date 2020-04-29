@@ -41,7 +41,10 @@ struct prl_node_entry {
     uint64_t        mtime;
     uint64_t        inode;
 
-    prl_node_entry() : size(0),type(0),flags(0),index(0),mtime(0),inode(0) { }
+    bool            assume_not_exist;           // set this flag if the parent was created (did not exist) because it means the child node (this) cannot exist
+    bool            this_node_did_not_exist;    // on adding the node, it did not exist, was created, therefore child nodes cannot exist (set assume_not_exist=true)
+
+    prl_node_entry() : size(0),type(0),flags(0),index(0),mtime(0),inode(0),assume_not_exist(false),this_node_did_not_exist(false) { }
     ~prl_node_entry() { }
 };
 
