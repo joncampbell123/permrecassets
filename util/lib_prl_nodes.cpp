@@ -149,7 +149,7 @@ bool prl_node_db_lookup_file_query(std::vector<prl_node_entry> &rlist,const std:
             results++;
         }
         else {
-            fprintf(stderr,"SQLITE statement error\n");
+            fprintf(stderr,"SQLITE statement error %d\n",sr);
             return -1;
         }
     } while(1);
@@ -244,7 +244,7 @@ bool prl_node_db_lookup_children_of_parent(std::vector<prl_node_entry> &rlist,pr
             results++;
         }
         else {
-            fprintf(stderr,"SQLITE statement error\n");
+            fprintf(stderr,"SQLITE statement error %d\n",sr);
             return -1;
         }
     } while(1);
@@ -338,7 +338,7 @@ bool prl_node_db_lookup_by_node_id(prl_node_entry &ent) {
             results++;
         }
         else {
-            fprintf(stderr,"SQLITE statement error\n");
+            fprintf(stderr,"SQLITE statement error %d\n",sr);
             break;
         }
     } while(1);
@@ -385,7 +385,7 @@ bool prl_node_db_add_fsentbyname(prl_node_entry &ent) {
                 results++;
             }
             else {
-                fprintf(stderr,"SQLITE statement error\n");
+                fprintf(stderr,"SQLITE statement error %d\n",sr);
                 break;
             }
         } while(1);
@@ -422,8 +422,14 @@ bool prl_node_db_add_fsentbyname(prl_node_entry &ent) {
             results++;
             break;
         }
+        else if (sr == SQLITE_CONSTRAINT) {
+            /* whoops, guess it already existed */
+            fprintf(stderr,"SQLITE warning: SQLITE_CONSTRAINT means the node already does exist. Assumption failed.\n",sr);
+            results++;
+            break;
+        }
         else {
-            fprintf(stderr,"SQLITE statement error\n");
+            fprintf(stderr,"SQLITE statement error %d\n",sr);
             break;
         }
     } while(1);
