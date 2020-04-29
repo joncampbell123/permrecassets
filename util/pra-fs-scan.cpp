@@ -37,7 +37,7 @@ static void scan_dir(const path_rel_label &prl,const std::string &rpath,const pr
     dir = opendir(fpath.c_str());
     if (dir == NULL) return;
 
-    printf("\x0D" "%s" "\x1B[K",rpath.c_str());
+    printf("\x0D" "\x1B[?7l" "%s" "\x1B[K" "\x1B[?7h",rpath.c_str());
     fflush(stdout);
 
     /* files first */
@@ -52,7 +52,7 @@ static void scan_dir(const path_rel_label &prl,const std::string &rpath,const pr
 
         ct = time(NULL);
         if (pt != ct) {
-            printf("\x0D" "%s/%s" "\x1B[K",rpath.c_str(),d->d_name);
+            printf("\x0D" "\x1B[?7l" "%s/%s" "\x1B[K" "\x1B[?7h",rpath.c_str(),d->d_name);
             fflush(stdout);
             pt = ct;
         }
@@ -95,7 +95,7 @@ static void scan_dir(const path_rel_label &prl,const std::string &rpath,const pr
 
         ct = time(NULL);
         if (pt != ct) {
-            printf("\x0D" "%s/%s" "\x1B[K",rpath.c_str(),d->d_name);
+            printf("\x0D" "\x1B[?7l" "%s/%s" "\x1B[K" "\x1B[?7h",rpath.c_str(),d->d_name);
             fflush(stdout);
             pt = ct;
         }
@@ -124,7 +124,7 @@ static void scan_dir(const path_rel_label &prl,const std::string &rpath,const pr
         if (S_ISDIR(st.st_mode)) {
             scan_dir(prl,rpath + (rpath.empty() ? "" : "/") + d->d_name,child_node); /* child node becomes parent later */
 
-            printf("\x0D" "%s" "\x1B[K",rpath.c_str());
+            printf("\x0D" "\x1B[?7l" "%s" "\x1B[K" "\x1B[?7h",rpath.c_str());
             fflush(stdout);
         }
     }
