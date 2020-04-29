@@ -424,7 +424,7 @@ bool prl_node_db_add_fsentbyname(prl_node_entry &ent) {
         }
         else if (sr == SQLITE_CONSTRAINT) {
             /* whoops, guess it already existed */
-            fprintf(stderr,"SQLITE warning: SQLITE_CONSTRAINT means the node already does exist. Assumption failed.\n",sr);
+            fprintf(stderr,"SQLITE warning: SQLITE_CONSTRAINT means the node already does exist. Assumption failed.\n");
             results++;
             break;
         }
