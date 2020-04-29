@@ -40,6 +40,8 @@ static void scan_dir(const path_rel_label &prl,const std::string &rpath,const pr
     printf("\x0D" "%s" "\x1B[K",rpath.c_str());
     fflush(stdout);
 
+    /* files first */
+    rewinddir(dir);
     while ((d=readdir(dir)) != NULL) {
         if (!strcmp(d->d_name,".") || !strcmp(d->d_name,".."))
             continue;
@@ -67,11 +69,47 @@ static void scan_dir(const path_rel_label &prl,const std::string &rpath,const pr
             child_node.type = NODE_TYPE_FILE;
             child_node.size = (uint64_t)st.st_size;
         }
-        else if (S_ISDIR(st.st_mode)) {
-            child_node.type = NODE_TYPE_DIRECTORY;
-        }
         else if (S_ISLNK(st.st_mode)) {
             child_node.type = NODE_TYPE_SYMLINK;
+        }
+        else {
+            continue;
+        }
+
+        /* also updates node_id */
+        if (!prl_node_db_add_fsentbyname(/*in&out*/child_node)) {
+            fprintf(stderr,"Failed to add or update fs node\n");
+            break;
+        }
+    }
+
+    /* then directories */
+    rewinddir(dir);
+    while ((d=readdir(dir)) != NULL) {
+        if (!strcmp(d->d_name,".") || !strcmp(d->d_name,".."))
+            continue;
+
+        const std::string filepath = fpath + "/" + d->d_name;
+
+        if (lstat(filepath.c_str(),&st)) continue;
+
+        ct = time(NULL);
+        if (pt != ct) {
+            printf("\x0D" "%s" "\x1B[K",filepath.c_str());
+            fflush(stdout);
+            pt = ct;
+        }
+
+        child_node.inode = st.st_ino;
+        child_node.mtime = st.st_mtime;
+        child_node.name_charset = "UTF-8";/*I always use UTF-8 for archives and the local fs */
+        child_node.assume_not_exist = parent_node.this_node_did_not_exist;
+        child_node.parent_node = parent_node.node_id;
+        child_node.real_name = std::string(d->d_name);
+        child_node.name = d->d_name;
+
+        if (S_ISDIR(st.st_mode)) {
+            child_node.type = NODE_TYPE_DIRECTORY;
         }
         else {
             continue;
