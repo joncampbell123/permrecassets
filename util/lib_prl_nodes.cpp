@@ -64,20 +64,17 @@ bool prl_node_db_lookup_file_query(std::vector<prl_node_entry> &rlist,const std:
     const char* pztail = NULL;
     int results,sr;
 
-    // Disabled. Future work will build a dictionary from filenames.
-    return false;
+    /* direct real_name lookup (name no longer has index) */
 
     rlist.clear();
 
-    std::string query_mod = std::string("%") + query + std::string("%");
-
     /*                                                0           1       2    3         4            5    6    7           8                9     10,   11 */
-    if (sqlite3_prepare_v2(prl_node_db_sqlite,"SELECT parent_node,node_id,name,real_name,name_charset,size,type,mime_string,content_encoding,flags,mtime,inode FROM nodes WHERE name LIKE ? ORDER BY name COLLATE NOCASE ASC;",-1,&stmt,&pztail) != SQLITE_OK) {
+    if (sqlite3_prepare_v2(prl_node_db_sqlite,"SELECT parent_node,node_id,name,real_name,name_charset,size,type,mime_string,content_encoding,flags,mtime,inode FROM nodes WHERE real_name = ? ORDER BY name COLLATE NOCASE ASC;",-1,&stmt,&pztail) != SQLITE_OK) {
         fprintf(stderr,"db_add_archive statement prepare failed\n");
         return false;
     }
     results = 0;
-    sqlite3_bind_text(stmt,1,query_mod.c_str(),query_mod.size(),NULL);/*node_id*/
+    sqlite3_bind_blob(stmt,1,query.c_str(),query.size(),NULL);
     do {
         sr = sqlite3_step(stmt);
         if (sr == SQLITE_BUSY) continue;
