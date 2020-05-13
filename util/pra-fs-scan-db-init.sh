@@ -15,8 +15,7 @@ CREATE TABLE IF NOT EXISTS nodes (
     inode               INTEGER
 );
 CREATE UNIQUE INDEX IF NOT EXISTS nodes_node_id ON nodes(node_id);
-CREATE        INDEX IF NOT EXISTS nodes_parent_node ON nodes(parent_node);
-CREATE UNIQUE INDEX IF NOT EXISTS nodes_real_name_parent_node_type_inode ON nodes(real_name,parent_node,type,inode);
+CREATE UNIQUE INDEX IF NOT EXISTS nodes_parent_node_real_name_inode ON nodes(parent_node,real_name,inode);
 PRAGMA journal_mode = WAL;
 _EOF
 

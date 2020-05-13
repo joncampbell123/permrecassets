@@ -64,7 +64,8 @@ bool prl_node_db_lookup_file_query(std::vector<prl_node_entry> &rlist,const std:
     const char* pztail = NULL;
     int results,sr;
 
-    /* direct real_name lookup (name no longer has index) */
+    // disabled. index for real_name and name removed.
+    return false;
 
     rlist.clear();
 
@@ -362,14 +363,14 @@ bool prl_node_db_add_fsentbyname(prl_node_entry &ent) {
          * If already exists, return without changing. */
         /*                                                1                                                                */
         /*                                                                         1                 2                   3 */
-        if (sqlite3_prepare_v2(prl_node_db_sqlite,"SELECT node_id FROM nodes WHERE real_name = ? AND parent_node = ? AND type = ? LIMIT 1;",-1,&stmt,&pztail) != SQLITE_OK) {
+        if (sqlite3_prepare_v2(prl_node_db_sqlite,"SELECT node_id FROM nodes WHERE real_name = ? AND parent_node = ? AND inode = ? LIMIT 1;",-1,&stmt,&pztail) != SQLITE_OK) {
             fprintf(stderr,"db_add_archive statement prepare failed\n");
             return false;
         }
         results = 0;
         sqlite3_bind_blob(stmt,1,&ent.real_name[0],ent.real_name.size(),NULL);/*name*/
         sqlite3_bind_blob(stmt,2,ent.parent_node.uuid,sizeof(ent.parent_node.uuid),NULL);/*parent_node*/
-        sqlite3_bind_int(stmt,3,ent.type);/*type*/
+        sqlite3_bind_int64(stmt,3,ent.inode);/*inode*/
         do {
             sr = sqlite3_step(stmt);
             if (sr == SQLITE_BUSY) continue;
