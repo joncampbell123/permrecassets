@@ -64,6 +64,9 @@ bool prl_node_db_lookup_file_query(std::vector<prl_node_entry> &rlist,const std:
     const char* pztail = NULL;
     int results,sr;
 
+    // Disabled. Future work will build a dictionary from filenames.
+    return false;
+
     rlist.clear();
 
     std::string query_mod = std::string("%") + query + std::string("%");

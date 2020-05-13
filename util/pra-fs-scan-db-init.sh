@@ -16,10 +16,10 @@ CREATE TABLE IF NOT EXISTS nodes (
 );
 CREATE UNIQUE INDEX IF NOT EXISTS nodes_node_id ON nodes(node_id);
 CREATE        INDEX IF NOT EXISTS nodes_parent_node ON nodes(parent_node);
-CREATE        INDEX IF NOT EXISTS nodes_name ON nodes(name);
 CREATE UNIQUE INDEX IF NOT EXISTS nodes_real_name_parent_node_type_inode ON nodes(real_name,parent_node,type,inode);
 PRAGMA journal_mode = WAL;
 _EOF
 
 # Nice to have, but performance issue once >= 2GB
 # CREATE        INDEX IF NOT EXISTS nodes_real_name ON nodes(real_name);
+# CREATE        INDEX IF NOT EXISTS nodes_name ON nodes(name);
