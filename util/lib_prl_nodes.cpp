@@ -77,6 +77,15 @@ bool prl_node_db_commit(void) {
     return true;
 }
 
+bool prl_node_db_wal_checkpoint(void) {
+    if (sqlite3_exec(prl_node_db_sqlite,"PRAGMA wal_checkpoint;",NULL,NULL,NULL) != SQLITE_OK) {
+        fprintf(stderr,"Checkpoint failed\n");
+        return false;
+    }
+
+    return true;
+}
+
 void prl_node_db_close(void) {
     if (prl_node_db_sqlite != NULL) {
         prl_node_db_commit();

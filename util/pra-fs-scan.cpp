@@ -270,6 +270,8 @@ int main(int argc,char **argv) {
     /* scandir */
     scan_dir(prl,prl.relpath,parent_node);
 
+    prl_node_db_commit();
+    prl_node_db_wal_checkpoint();
     prl_node_db_close();
     return 0;
 }
