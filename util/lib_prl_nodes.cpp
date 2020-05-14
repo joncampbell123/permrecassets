@@ -50,8 +50,27 @@ bool prl_node_db_open(void) {
     return true;
 }
 
+bool prl_node_db_begin_transaction(void) {
+    if (sqlite3_exec(prl_node_db_sqlite,"BEGIN TRANSACTION;",NULL,NULL,NULL) != SQLITE_OK) {
+        fprintf(stderr,"BEGIN TRANSACTION failed\n");
+        return false;
+    }
+
+    return true;
+}
+
+bool prl_node_db_commit(void) {
+    if (sqlite3_exec(prl_node_db_sqlite,"COMMIT;",NULL,NULL,NULL) != SQLITE_OK) {
+        fprintf(stderr,"COMMIT failed\n");
+        return false;
+    }
+
+    return true;
+}
+
 void prl_node_db_close(void) {
     if (prl_node_db_sqlite != NULL) {
+        prl_node_db_commit();
         sqlite3_close_v2(prl_node_db_sqlite);
         prl_node_db_sqlite = NULL;
     }

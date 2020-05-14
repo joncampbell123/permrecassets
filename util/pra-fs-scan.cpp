@@ -200,6 +200,11 @@ int main(int argc,char **argv) {
         return 1;
     }
 
+    if (!prl_node_db_begin_transaction()) {
+        fprintf(stderr,"Unable to begin transaction\n");
+        return 1;
+    }
+
     parent_node.type = NODE_TYPE_ARCHIVE;
     parent_node.name_charset = "UTF-8";/*I always use UTF-8 for archives and the local fs */
     parent_node.parent_node = prl_zero_node;
