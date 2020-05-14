@@ -50,19 +50,28 @@ bool prl_node_db_open(void) {
     return true;
 }
 
+static bool prl_db_in_transaction = false;
+
 bool prl_node_db_begin_transaction(void) {
-    if (sqlite3_exec(prl_node_db_sqlite,"BEGIN TRANSACTION;",NULL,NULL,NULL) != SQLITE_OK) {
-        fprintf(stderr,"BEGIN TRANSACTION failed\n");
-        return false;
+    if (!prl_db_in_transaction) {
+        if (sqlite3_exec(prl_node_db_sqlite,"BEGIN TRANSACTION;",NULL,NULL,NULL) != SQLITE_OK) {
+            fprintf(stderr,"BEGIN TRANSACTION failed\n");
+            return false;
+        }
+
+        prl_db_in_transaction=true;
     }
 
     return true;
 }
 
 bool prl_node_db_commit(void) {
-    if (sqlite3_exec(prl_node_db_sqlite,"COMMIT;",NULL,NULL,NULL) != SQLITE_OK) {
-        fprintf(stderr,"COMMIT failed\n");
-        return false;
+    if (prl_db_in_transaction) {
+        prl_db_in_transaction=false;
+        if (sqlite3_exec(prl_node_db_sqlite,"COMMIT;",NULL,NULL,NULL) != SQLITE_OK) {
+            fprintf(stderr,"COMMIT failed\n");
+            return false;
+        }
     }
 
     return true;
