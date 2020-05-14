@@ -40,6 +40,9 @@ static void scan_dir(const path_rel_label &prl,const std::string &rpath,const pr
     printf("\x0D" "\x1B[?7l" "%s" "\x1B[K" "\x1B[?7h",rpath.c_str());
     fflush(stdout);
 
+    if (!prl_node_db_begin_transaction())
+        fprintf(stderr,"WARNING: Unable to begin transaction\n");
+
     /* files first */
     rewinddir(dir);
     while ((d=readdir(dir)) != NULL) {
@@ -82,6 +85,8 @@ static void scan_dir(const path_rel_label &prl,const std::string &rpath,const pr
             break;
         }
     }
+
+    prl_node_db_commit();
 
     /* then directories */
     rewinddir(dir);
@@ -197,11 +202,6 @@ int main(int argc,char **argv) {
 
     if (!prl_node_db_open()) {
         fprintf(stderr,"Unable to open SQLite3 DB. Use pra-fs-scan-db-init.sh\n");
-        return 1;
-    }
-
-    if (!prl_node_db_begin_transaction()) {
-        fprintf(stderr,"Unable to begin transaction\n");
         return 1;
     }
 
