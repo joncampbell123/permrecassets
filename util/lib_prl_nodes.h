@@ -5,6 +5,8 @@
 #include "lib_prluuid.h"
 #include "lib_prl_blob.h"
 
+#include <sqlite3.h>
+
 extern const prluuid prl_zero_node;
 
 enum prl_node_type {
@@ -67,6 +69,15 @@ bool prl_node_db_scan_commit(void);
 
 std::string prl_archive_sort_func_filter(const std::string &s);
 bool prl_archive_sort_func(const prl_node_entry &a,const prl_node_entry &b);
+
+/* API for sequential file scan */
+struct prl_file_raw_enum {
+    sqlite3_stmt*       stmt = NULL;
+
+    bool                begin_enum();
+    bool                next(struct prl_node_entry &prl);
+    void                end_enum();
+};
 
 #endif /*UTIL_LIB_PRL_NODES_H*/
 

@@ -573,3 +573,109 @@ bool prl_archive_sort_func(const prl_node_entry &a,const prl_node_entry &b) {
     return sa < sb;
 }
 
+bool prl_file_raw_enum::begin_enum() {
+    if (stmt == NULL) {
+        const char* pztail = NULL;
+
+        /*                                                     0       1           2    3         4            5    6    7           8                9     10    11 */
+        if (sqlite3_prepare_v2(prl_node_db_scan_sqlite,"SELECT node_id,parent_node,name,real_name,name_charset,size,type,mime_string,content_encoding,flags,mtime,inode FROM nodes;",-1,&stmt,&pztail) != SQLITE_OK) {
+            fprintf(stderr,"begin_enum statement prepare failed\n");
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool prl_file_raw_enum::next(struct prl_node_entry &prl) {
+    int sr;
+
+    if (stmt != NULL) {
+        do {
+            sr = sqlite3_step(stmt);
+            if (sr == SQLITE_BUSY) continue;
+            else if (sr == SQLITE_DONE) break;
+            else if (sr == SQLITE_ROW) {
+                prl_node_entry chent;
+
+                /* node_id */
+                {
+                    chent.node_id = prl_zero_node;
+                    int blobsz = sqlite3_column_bytes(stmt,0);
+                    if (blobsz == sizeof(chent.node_id.uuid)) {
+                        const void *b = sqlite3_column_blob(stmt,0);
+                        if (b != NULL) memcpy(chent.node_id.uuid,b,sizeof(chent.node_id.uuid));
+                    }
+                }
+                /* parent_node */
+                {
+                    chent.parent_node = prl_zero_node;
+                    int blobsz = sqlite3_column_bytes(stmt,1);
+                    if (blobsz == sizeof(chent.parent_node.uuid)) {
+                        const void *b = sqlite3_column_blob(stmt,1);
+                        if (b != NULL) memcpy(chent.parent_node.uuid,b,sizeof(chent.parent_node.uuid));
+                    }
+                }
+                /* name */
+                {
+                    const unsigned char *t = sqlite3_column_text(stmt,2);
+                    chent.name = (t != NULL) ? (char*)t : "";
+                }
+                /* real_name */
+                {
+                    int blobsz = sqlite3_column_bytes(stmt,3);
+                    const void *b = sqlite3_column_blob(stmt,3);
+                    if (blobsz > 0 && b != NULL) {
+                        chent.real_name.resize(blobsz);
+                        memcpy(&chent.real_name[0],b,blobsz);
+                    }
+                    else {
+                        chent.real_name.clear();
+                    }
+                }
+                /* name_charset */
+                {
+                    const unsigned char *t = sqlite3_column_text(stmt,4);
+                    chent.name_charset = (t != NULL) ? (char*)t : "";
+                }
+                /* size */
+                chent.size = sqlite3_column_int64(stmt,5);
+                /* type */
+                chent.type = sqlite3_column_int(stmt,6);
+                /* mime_string */
+                {
+                    const unsigned char *t = sqlite3_column_text(stmt,7);
+                    chent.mime_string = (t != NULL) ? (char*)t : "";
+                }
+                /* content_encoding */
+                {
+                    const unsigned char *t = sqlite3_column_text(stmt,8);
+                    chent.mime_string = (t != NULL) ? (char*)t : "";
+                }
+                /* flags */
+                chent.flags = sqlite3_column_int64(stmt,9);
+                /* mtime */
+                chent.mtime = sqlite3_column_int64(stmt,10);
+                /* inode */
+                chent.inode = sqlite3_column_int64(stmt,11);
+
+                prl = chent;
+                return true;
+            }
+            else {
+                fprintf(stderr,"SQLITE statement error %d\n",sr);
+                break;
+            }
+        } while(1);
+    }
+
+    return false;
+}
+
+void prl_file_raw_enum::end_enum() {
+    if (stmt != NULL) {
+        sqlite3_finalize(stmt);
+        stmt = NULL;
+    }
+}
+
