@@ -40,7 +40,7 @@ static void scan_dir(const path_rel_label &prl,const std::string &rpath,const pr
     printf("\x0D" "\x1B[?7l" "%s" "\x1B[K" "\x1B[?7h",rpath.c_str());
     fflush(stdout);
 
-    if (!prl_node_db_begin_transaction())
+    if (!prl_node_db_scan_begin_transaction())
         fprintf(stderr,"WARNING: Unable to begin transaction\n");
 
     /* files first */
@@ -86,7 +86,7 @@ static void scan_dir(const path_rel_label &prl,const std::string &rpath,const pr
         }
     }
 
-    prl_node_db_commit();
+    prl_node_db_scan_commit();
 
     /* then directories */
     rewinddir(dir);
@@ -270,8 +270,8 @@ int main(int argc,char **argv) {
     /* scandir */
     scan_dir(prl,prl.relpath,parent_node);
 
-    prl_node_db_commit();
-    prl_node_db_wal_checkpoint();
+    prl_node_db_scan_commit();
+    prl_node_db_scan_wal_checkpoint();
     prl_node_db_close();
     return 0;
 }

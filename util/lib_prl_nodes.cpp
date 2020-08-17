@@ -50,24 +50,24 @@ bool prl_node_db_open(void) {
     return true;
 }
 
-static bool prl_db_in_transaction = false;
+static bool prl_db_scan_in_transaction = false;
 
-bool prl_node_db_begin_transaction(void) {
-    if (!prl_db_in_transaction) {
+bool prl_node_db_scan_begin_transaction(void) {
+    if (!prl_db_scan_in_transaction) {
         if (sqlite3_exec(prl_node_db_scan_sqlite,"BEGIN TRANSACTION;",NULL,NULL,NULL) != SQLITE_OK) {
             fprintf(stderr,"BEGIN TRANSACTION failed\n");
             return false;
         }
 
-        prl_db_in_transaction=true;
+        prl_db_scan_in_transaction=true;
     }
 
     return true;
 }
 
-bool prl_node_db_commit(void) {
-    if (prl_db_in_transaction) {
-        prl_db_in_transaction=false;
+bool prl_node_db_scan_commit(void) {
+    if (prl_db_scan_in_transaction) {
+        prl_db_scan_in_transaction=false;
         if (sqlite3_exec(prl_node_db_scan_sqlite,"COMMIT;",NULL,NULL,NULL) != SQLITE_OK) {
             fprintf(stderr,"COMMIT failed\n");
             return false;
@@ -77,7 +77,7 @@ bool prl_node_db_commit(void) {
     return true;
 }
 
-bool prl_node_db_wal_checkpoint(void) {
+bool prl_node_db_scan_wal_checkpoint(void) {
     if (sqlite3_exec(prl_node_db_scan_sqlite,"PRAGMA wal_checkpoint;",NULL,NULL,NULL) != SQLITE_OK) {
         fprintf(stderr,"Checkpoint failed\n");
         return false;
@@ -88,7 +88,7 @@ bool prl_node_db_wal_checkpoint(void) {
 
 void prl_node_db_close(void) {
     if (prl_node_db_scan_sqlite != NULL) {
-        prl_node_db_commit();
+        prl_node_db_scan_commit();
         sqlite3_close_v2(prl_node_db_scan_sqlite);
         prl_node_db_scan_sqlite = NULL;
     }
