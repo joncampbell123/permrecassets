@@ -26,6 +26,8 @@ lib_prluuid.o: lib_prluuid.cpp
 	g++ $(CXXFLAGS) -c -o $@ $^
 lib_prl_udev.o: lib_prl_udev.cpp
 	g++ $(CXXFLAGS) -c -o $@ $^
+lib_prl_words.o: lib_prl_words.cpp
+	g++ $(CXXFLAGS) -c -o $@ $^
 lib_prl_nodes.o: lib_prl_nodes.cpp
 	g++ $(CXXFLAGS) -c -o $@ $^
 lib_splitpath.o: lib_splitpath.cpp
@@ -38,7 +40,7 @@ lib_cpp_realpath.o: lib_cpp_realpath.cpp
 	g++ $(CXXFLAGS) -c -o $@ $^
 lib_path_rel_label.o: lib_path_rel_label.cpp
 	g++ $(CXXFLAGS) -c -o $@ $^
-libpermrecassetutil.a: lib_procmount.o lib_path_rel_label.o lib_prluuid.o lib_splitpath.o lib_prl_nodes.o lib_cpp_realpath.o lib_fs_isrdonly.o lib_prl_udev.o
+libpermrecassetutil.a: lib_procmount.o lib_path_rel_label.o lib_prluuid.o lib_splitpath.o lib_prl_nodes.o lib_cpp_realpath.o lib_fs_isrdonly.o lib_prl_udev.o lib_prl_words.o
 	rm -f $@
 	ar r $@ $^
 
