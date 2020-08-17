@@ -24,14 +24,14 @@ using namespace std;
 
 const prluuid prl_zero_node = { 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0 };
 
-static sqlite3* prl_node_db_sqlite = NULL;
+static sqlite3* prl_node_db_scan_sqlite = NULL;
 
 bool prl_node_db_open_ro(void) {
-    if (prl_node_db_sqlite == NULL) {
-        if (sqlite3_open_v2("pra-fs-scan.db",&prl_node_db_sqlite,SQLITE_OPEN_READONLY|SQLITE_OPEN_FULLMUTEX/*|SQLITE_OPEN_NOFOLLOW*/,NULL) != SQLITE_OK)
+    if (prl_node_db_scan_sqlite == NULL) {
+        if (sqlite3_open_v2("pra-fs-scan.db",&prl_node_db_scan_sqlite,SQLITE_OPEN_READONLY|SQLITE_OPEN_FULLMUTEX/*|SQLITE_OPEN_NOFOLLOW*/,NULL) != SQLITE_OK)
             return false;
 
-        if (sqlite3_exec(prl_node_db_sqlite,"PRAGMA synchronous = 0;",NULL,NULL,NULL) != SQLITE_OK)
+        if (sqlite3_exec(prl_node_db_scan_sqlite,"PRAGMA synchronous = 0;",NULL,NULL,NULL) != SQLITE_OK)
             fprintf(stderr,"PRAGMA synchronous failed\n");
     }
 
@@ -39,11 +39,11 @@ bool prl_node_db_open_ro(void) {
 }
 
 bool prl_node_db_open(void) {
-    if (prl_node_db_sqlite == NULL) {
-        if (sqlite3_open_v2("pra-fs-scan.db",&prl_node_db_sqlite,SQLITE_OPEN_READWRITE|SQLITE_OPEN_FULLMUTEX/*|SQLITE_OPEN_NOFOLLOW*/,NULL) != SQLITE_OK)
+    if (prl_node_db_scan_sqlite == NULL) {
+        if (sqlite3_open_v2("pra-fs-scan.db",&prl_node_db_scan_sqlite,SQLITE_OPEN_READWRITE|SQLITE_OPEN_FULLMUTEX/*|SQLITE_OPEN_NOFOLLOW*/,NULL) != SQLITE_OK)
             return false;
 
-        if (sqlite3_exec(prl_node_db_sqlite,"PRAGMA synchronous = 0;",NULL,NULL,NULL) != SQLITE_OK)
+        if (sqlite3_exec(prl_node_db_scan_sqlite,"PRAGMA synchronous = 0;",NULL,NULL,NULL) != SQLITE_OK)
             fprintf(stderr,"PRAGMA synchronous failed\n");
     }
 
@@ -54,7 +54,7 @@ static bool prl_db_in_transaction = false;
 
 bool prl_node_db_begin_transaction(void) {
     if (!prl_db_in_transaction) {
-        if (sqlite3_exec(prl_node_db_sqlite,"BEGIN TRANSACTION;",NULL,NULL,NULL) != SQLITE_OK) {
+        if (sqlite3_exec(prl_node_db_scan_sqlite,"BEGIN TRANSACTION;",NULL,NULL,NULL) != SQLITE_OK) {
             fprintf(stderr,"BEGIN TRANSACTION failed\n");
             return false;
         }
@@ -68,7 +68,7 @@ bool prl_node_db_begin_transaction(void) {
 bool prl_node_db_commit(void) {
     if (prl_db_in_transaction) {
         prl_db_in_transaction=false;
-        if (sqlite3_exec(prl_node_db_sqlite,"COMMIT;",NULL,NULL,NULL) != SQLITE_OK) {
+        if (sqlite3_exec(prl_node_db_scan_sqlite,"COMMIT;",NULL,NULL,NULL) != SQLITE_OK) {
             fprintf(stderr,"COMMIT failed\n");
             return false;
         }
@@ -78,7 +78,7 @@ bool prl_node_db_commit(void) {
 }
 
 bool prl_node_db_wal_checkpoint(void) {
-    if (sqlite3_exec(prl_node_db_sqlite,"PRAGMA wal_checkpoint;",NULL,NULL,NULL) != SQLITE_OK) {
+    if (sqlite3_exec(prl_node_db_scan_sqlite,"PRAGMA wal_checkpoint;",NULL,NULL,NULL) != SQLITE_OK) {
         fprintf(stderr,"Checkpoint failed\n");
         return false;
     }
@@ -87,10 +87,10 @@ bool prl_node_db_wal_checkpoint(void) {
 }
 
 void prl_node_db_close(void) {
-    if (prl_node_db_sqlite != NULL) {
+    if (prl_node_db_scan_sqlite != NULL) {
         prl_node_db_commit();
-        sqlite3_close_v2(prl_node_db_sqlite);
-        prl_node_db_sqlite = NULL;
+        sqlite3_close_v2(prl_node_db_scan_sqlite);
+        prl_node_db_scan_sqlite = NULL;
     }
 }
 
@@ -107,7 +107,7 @@ bool prl_node_db_lookup_file_query(std::vector<prl_node_entry> &rlist,const std:
     rlist.clear();
 
     /*                                                0           1       2    3         4            5    6    7           8                9     10,   11 */
-    if (sqlite3_prepare_v2(prl_node_db_sqlite,"SELECT parent_node,node_id,name,real_name,name_charset,size,type,mime_string,content_encoding,flags,mtime,inode FROM nodes WHERE real_name = ? ORDER BY name COLLATE NOCASE ASC;",-1,&stmt,&pztail) != SQLITE_OK) {
+    if (sqlite3_prepare_v2(prl_node_db_scan_sqlite,"SELECT parent_node,node_id,name,real_name,name_charset,size,type,mime_string,content_encoding,flags,mtime,inode FROM nodes WHERE real_name = ? ORDER BY name COLLATE NOCASE ASC;",-1,&stmt,&pztail) != SQLITE_OK) {
         fprintf(stderr,"db_add_archive statement prepare failed\n");
         return false;
     }
@@ -209,7 +209,7 @@ bool prl_node_db_lookup_children_of_parent(std::vector<prl_node_entry> &rlist,pr
     rlist.clear();
 
     /*                                                0           1    2         3            4    5    6           7                8     9     10 */
-    if (sqlite3_prepare_v2(prl_node_db_sqlite,"SELECT node_id,name,real_name,name_charset,size,type,mime_string,content_encoding,flags,mtime,inode FROM nodes WHERE parent_node = ? ORDER BY name COLLATE NOCASE ASC;",-1,&stmt,&pztail) != SQLITE_OK) {
+    if (sqlite3_prepare_v2(prl_node_db_scan_sqlite,"SELECT node_id,name,real_name,name_charset,size,type,mime_string,content_encoding,flags,mtime,inode FROM nodes WHERE parent_node = ? ORDER BY name COLLATE NOCASE ASC;",-1,&stmt,&pztail) != SQLITE_OK) {
         fprintf(stderr,"db_add_archive statement prepare failed\n");
         return false;
     }
@@ -309,7 +309,7 @@ bool prl_node_db_lookup_by_node_id(prl_node_entry &ent) {
     int results,sr;
 
     /*                                                0           1    2         3            4    5    6           7                8     9     10 */
-    if (sqlite3_prepare_v2(prl_node_db_sqlite,"SELECT parent_node,name,real_name,name_charset,size,type,mime_string,content_encoding,flags,mtime,inode FROM nodes WHERE node_id = ? LIMIT 1;",-1,&stmt,&pztail) != SQLITE_OK) {
+    if (sqlite3_prepare_v2(prl_node_db_scan_sqlite,"SELECT parent_node,name,real_name,name_charset,size,type,mime_string,content_encoding,flags,mtime,inode FROM nodes WHERE node_id = ? LIMIT 1;",-1,&stmt,&pztail) != SQLITE_OK) {
         fprintf(stderr,"db_add_archive statement prepare failed\n");
         return false;
     }
@@ -400,7 +400,7 @@ bool prl_node_db_add_fsentbyname(prl_node_entry &ent) {
          * If already exists, return without changing. */
         /*                                                1                                                                */
         /*                                                                         1                 2                   3 */
-        if (sqlite3_prepare_v2(prl_node_db_sqlite,"SELECT node_id FROM nodes WHERE real_name = ? AND parent_node = ? AND inode = ? LIMIT 1;",-1,&stmt,&pztail) != SQLITE_OK) {
+        if (sqlite3_prepare_v2(prl_node_db_scan_sqlite,"SELECT node_id FROM nodes WHERE real_name = ? AND parent_node = ? AND inode = ? LIMIT 1;",-1,&stmt,&pztail) != SQLITE_OK) {
             fprintf(stderr,"db_add_archive statement prepare failed\n");
             return false;
         }
@@ -439,7 +439,7 @@ bool prl_node_db_add_fsentbyname(prl_node_entry &ent) {
     prluuidgen(ent.node_id);
 
     /*                                                            1       2           3    4         5            6    7    8     9             1 2 3 4 5 6 7 8 9 */
-    if (sqlite3_prepare_v2(prl_node_db_sqlite,"INSERT INTO nodes (node_id,parent_node,name,real_name,name_charset,size,type,mtime,inode) VALUES(?,?,?,?,?,?,?,?,?);",-1,&stmt,&pztail) != SQLITE_OK) {
+    if (sqlite3_prepare_v2(prl_node_db_scan_sqlite,"INSERT INTO nodes (node_id,parent_node,name,real_name,name_charset,size,type,mtime,inode) VALUES(?,?,?,?,?,?,?,?,?);",-1,&stmt,&pztail) != SQLITE_OK) {
         fprintf(stderr,"db_add_archive insert statement prepare failed\n");
         return false;
     }
