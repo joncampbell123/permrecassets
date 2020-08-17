@@ -16,6 +16,13 @@
 
 using namespace std;
 
+bool prl_wordbreak(const char c) {
+    if ((c > 0 && c < 32) || c == ' ' || c == ',' || c == ';' || c == '\\' || c == '.' || c == '-' || c == '+' || c == '*' || c == '[' || c == ']' || c == '{' || c == '}')
+        return true;
+
+    return false;
+}
+
 std::vector<std::string> prl_filename2dict(const std::string &spp) {
     std::vector<const char *> wbeg;
     std::vector<std::string> ret;
@@ -23,7 +30,7 @@ std::vector<std::string> prl_filename2dict(const std::string &spp) {
     const char *wordbeg = NULL;
 
     while (*s != 0) {
-        if ((*s > 0 && *s < 32) || *s == ' ' || *s == ',' || *s == ';' || *s == '\\' || *s == '.' || *s == '-' || *s == '+' || *s == '*') {
+        if (prl_wordbreak(*s)) {
             if (wordbeg != NULL) {
                 wbeg.push_back(wordbeg);
                 wordbeg = NULL;
@@ -56,6 +63,24 @@ std::vector<std::string> prl_filename2dict(const std::string &spp) {
     return ret;
 }
 
+std::string prl_normalizeword(const std::string &s) {
+    std::string r;
+    char pc = 0;
+
+    for (const auto &c : s) {
+        if (c > 32 && c < 127 && !prl_wordbreak(c))
+            r += tolower(c);
+        else if (c < 0)
+            r += c; /* allow unicode for now as-is */
+        else if (pc > 32 && pc < 127 && !prl_wordbreak(pc))
+            r += ' ';
+
+        pc = c;
+    }
+
+    return r;
+}
+
 int main() {
     if (!prl_node_db_open()) {
         fprintf(stderr,"Unable to open SQLite3 DB. Use pra-fs-scan-db-init.sh\n");
@@ -71,7 +96,10 @@ int main() {
             while (en.next(node)) {
                 std::vector<std::string> dict = prl_filename2dict(node.name);
                 printf("%s: %s\n",node.node_id.to_string().c_str(),node.name.c_str());
-                for (const auto &s : dict) printf("  '%s'\n",s.c_str());
+                for (const auto &s : dict) {
+                    std::string n = prl_normalizeword(s);
+                    printf("  '%s' => '%s'\n",s.c_str(),n.c_str());
+                }
                 printf("\n");
             }
             en.end_enum();
