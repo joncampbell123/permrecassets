@@ -13,8 +13,6 @@
 #include "lib_prl_nodes.h"
 #include "lib_prl_words.h"
 
-#include <algorithm>
-
 using namespace std;
 
 int main() {
