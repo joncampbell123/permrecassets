@@ -13,6 +13,7 @@ install: $(PROGS)
 	cp -v permasset-identify $(DESTDIR)/usr/bin/
 	cp -v pra-fs-scan-db-init.sh $(DESTDIR)/usr/bin/
 	cp -v pra-fs-scan-db-view.sh $(DESTDIR)/usr/bin/
+	cp -v pra-fs-search-db-view.sh $(DESTDIR)/usr/bin/
 	cp -v pra-fs-scan-db-checkpoint.sh $(DESTDIR)/usr/bin/
 	cp -v permasset-scan $(DESTDIR)/usr/bin/
 	cp -v pra-fs-scan $(DESTDIR)/usr/bin/
