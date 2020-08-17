@@ -56,6 +56,11 @@ bool prl_node_db_lookup_by_node_id(prl_node_entry &ent);
 bool prl_node_db_lookup_file_query(std::vector<prl_node_entry> &rlist,const std::string &query);
 bool prl_node_db_lookup_node_tree_path(std::vector<prl_node_entry> &plist,prl_node_entry &pent);
 bool prl_node_db_lookup_children_of_parent(std::vector<prl_node_entry> &rlist,prl_node_entry &pent);
+
+bool prl_node_db_search_begin_transaction(void);
+bool prl_node_db_search_wal_checkpoint(void);
+bool prl_node_db_search_commit(void);
+
 bool prl_node_db_scan_begin_transaction(void);
 bool prl_node_db_scan_wal_checkpoint(void);
 bool prl_node_db_scan_commit(void);

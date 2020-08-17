@@ -25,6 +25,7 @@ using namespace std;
 const prluuid prl_zero_node = { 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0 };
 
 static sqlite3* prl_node_db_scan_sqlite = NULL;
+static sqlite3* prl_node_db_search_sqlite = NULL;
 
 bool prl_node_db_open_ro(void) {
     if (prl_node_db_scan_sqlite == NULL) {
@@ -32,6 +33,14 @@ bool prl_node_db_open_ro(void) {
             return false;
 
         if (sqlite3_exec(prl_node_db_scan_sqlite,"PRAGMA synchronous = 0;",NULL,NULL,NULL) != SQLITE_OK)
+            fprintf(stderr,"PRAGMA synchronous failed\n");
+    }
+
+    if (prl_node_db_search_sqlite == NULL) {
+        if (sqlite3_open_v2("pra-fs-search.db",&prl_node_db_search_sqlite,SQLITE_OPEN_READONLY|SQLITE_OPEN_FULLMUTEX/*|SQLITE_OPEN_NOFOLLOW*/,NULL) != SQLITE_OK)
+            return false;
+
+        if (sqlite3_exec(prl_node_db_search_sqlite,"PRAGMA synchronous = 0;",NULL,NULL,NULL) != SQLITE_OK)
             fprintf(stderr,"PRAGMA synchronous failed\n");
     }
 
@@ -44,6 +53,14 @@ bool prl_node_db_open(void) {
             return false;
 
         if (sqlite3_exec(prl_node_db_scan_sqlite,"PRAGMA synchronous = 0;",NULL,NULL,NULL) != SQLITE_OK)
+            fprintf(stderr,"PRAGMA synchronous failed\n");
+    }
+
+    if (prl_node_db_search_sqlite == NULL) {
+        if (sqlite3_open_v2("pra-fs-search.db",&prl_node_db_search_sqlite,SQLITE_OPEN_READWRITE|SQLITE_OPEN_FULLMUTEX/*|SQLITE_OPEN_NOFOLLOW*/,NULL) != SQLITE_OK)
+            return false;
+
+        if (sqlite3_exec(prl_node_db_search_sqlite,"PRAGMA synchronous = 0;",NULL,NULL,NULL) != SQLITE_OK)
             fprintf(stderr,"PRAGMA synchronous failed\n");
     }
 
@@ -86,11 +103,52 @@ bool prl_node_db_scan_wal_checkpoint(void) {
     return true;
 }
 
+static bool prl_db_search_in_transaction = false;
+
+bool prl_node_db_search_begin_transaction(void) {
+    if (!prl_db_search_in_transaction) {
+        if (sqlite3_exec(prl_node_db_search_sqlite,"BEGIN TRANSACTION;",NULL,NULL,NULL) != SQLITE_OK) {
+            fprintf(stderr,"BEGIN TRANSACTION failed\n");
+            return false;
+        }
+
+        prl_db_search_in_transaction=true;
+    }
+
+    return true;
+}
+
+bool prl_node_db_search_commit(void) {
+    if (prl_db_search_in_transaction) {
+        prl_db_search_in_transaction=false;
+        if (sqlite3_exec(prl_node_db_search_sqlite,"COMMIT;",NULL,NULL,NULL) != SQLITE_OK) {
+            fprintf(stderr,"COMMIT failed\n");
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool prl_node_db_search_wal_checkpoint(void) {
+    if (sqlite3_exec(prl_node_db_search_sqlite,"PRAGMA wal_checkpoint;",NULL,NULL,NULL) != SQLITE_OK) {
+        fprintf(stderr,"Checkpoint failed\n");
+        return false;
+    }
+
+    return true;
+}
+
 void prl_node_db_close(void) {
     if (prl_node_db_scan_sqlite != NULL) {
         prl_node_db_scan_commit();
         sqlite3_close_v2(prl_node_db_scan_sqlite);
         prl_node_db_scan_sqlite = NULL;
+    }
+    if (prl_node_db_search_sqlite != NULL) {
+        prl_node_db_search_commit();
+        sqlite3_close_v2(prl_node_db_search_sqlite);
+        prl_node_db_search_sqlite = NULL;
     }
 }
 
