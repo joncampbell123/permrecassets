@@ -79,5 +79,8 @@ struct prl_file_raw_enum {
     void                end_enum();
 };
 
+bool prl_node_db_search_delete_by_type(const std::string mtype);
+bool prl_node_db_search_delete_by_type_and_node(const std::string mtype,const prluuid &node_id);
+
 #endif /*UTIL_LIB_PRL_NODES_H*/
 

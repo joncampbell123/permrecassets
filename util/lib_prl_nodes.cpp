@@ -679,3 +679,56 @@ void prl_file_raw_enum::end_enum() {
     }
 }
 
+bool prl_node_db_search_delete_by_type(const std::string mtype) {
+    sqlite3_stmt* stmt = NULL;
+    const char* pztail = NULL;
+    int sr;
+
+    if (sqlite3_prepare_v2(prl_node_db_search_sqlite,"DELETE from dict WHERE mtype = ?;",-1,&stmt,&pztail) != SQLITE_OK) {
+        fprintf(stderr,"db_search_delete_type insert statement prepare failed\n");
+        return false;
+    }
+    sqlite3_bind_text(stmt,1,mtype.c_str(),-1,NULL);/*mtype*/
+    do {
+        sr = sqlite3_step(stmt);
+        if (sr == SQLITE_BUSY) continue;
+        else if (sr == SQLITE_DONE) {
+            break;
+        }
+        else {
+            fprintf(stderr,"SQLITE statement error %d\n",sr);
+            break;
+        }
+    } while(1);
+    sqlite3_finalize(stmt);
+
+    return true;
+}
+
+bool prl_node_db_search_delete_by_type_and_node(const std::string mtype,const prluuid &node_id) {
+    sqlite3_stmt* stmt = NULL;
+    const char* pztail = NULL;
+    int sr;
+
+    if (sqlite3_prepare_v2(prl_node_db_search_sqlite,"DELETE from dict WHERE mtype = ? and node_id = ?;",-1,&stmt,&pztail) != SQLITE_OK) {
+        fprintf(stderr,"db_search_delete_type insert statement prepare failed\n");
+        return false;
+    }
+    sqlite3_bind_text(stmt,1,mtype.c_str(),-1,NULL);/*mtype*/
+    sqlite3_bind_blob(stmt,2,node_id.uuid,sizeof(node_id.uuid),NULL);/*node_id*/
+    do {
+        sr = sqlite3_step(stmt);
+        if (sr == SQLITE_BUSY) continue;
+        else if (sr == SQLITE_DONE) {
+            break;
+        }
+        else {
+            fprintf(stderr,"SQLITE statement error %d\n",sr);
+            break;
+        }
+    } while(1);
+    sqlite3_finalize(stmt);
+
+    return true;
+}
+
