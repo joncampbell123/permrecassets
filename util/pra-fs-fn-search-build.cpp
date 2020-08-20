@@ -48,6 +48,7 @@ int main() {
                     if (debug_out)
                         printf("  '%s' => '%s'\n",s.c_str(),n.c_str());
 
+                    prl_node_db_search_insert_type_and_node(prl_search_dict_id_filename,node.node_id,n);
                     kw_count++;
                 }
                 if (debug_out)

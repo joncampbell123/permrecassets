@@ -42,12 +42,13 @@ _EOF
 #  FN = filename match
 sqlite3 -bail pra-fs-search.db <<_EOF
 CREATE TABLE IF NOT EXISTS dict (
-    word                BLOB PRIMARY KEY NOT NULL,
+    word                BLOB NOT NULL,
     node_id             BLOB,
-    mtype               TEXT,
+    mtype               TEXT NOT NULL,
     mtime               INTEGER,
     context             BLOB,
-    weight              REAL
+    weight              REAL,
+    PRIMARY KEY (word,node_id,mtype)
 );
 CREATE INDEX IF NOT EXISTS dict_word ON dict(word);
 CREATE INDEX IF NOT EXISTS dict_node_id ON dict(node_id);
