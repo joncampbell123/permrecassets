@@ -13,8 +13,6 @@
 #include "lib_prl_nodes.h"
 #include "lib_prl_words.h"
 
-#include <algorithm>
-
 using namespace std;
 
 bool prl_wordbreak(const char c) {
@@ -60,7 +58,6 @@ std::vector<std::string> prl_filename2dict(const std::string &spp) {
         }
     }
 
-    std::sort(ret.begin(),ret.end());
     return ret;
 }
 

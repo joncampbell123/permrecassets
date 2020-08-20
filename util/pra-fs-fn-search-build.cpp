@@ -13,6 +13,8 @@
 #include "lib_prl_nodes.h"
 #include "lib_prl_words.h"
 
+#include <algorithm>
+
 using namespace std;
 
 bool debug_out = false;
@@ -42,13 +44,21 @@ int main() {
                 if (debug_out)
                     printf("%s: %s\n",node.node_id.to_string().c_str(),node.name.c_str());
 
+                if (debug_out) {
+                    for (const auto &s : dict)
+                        printf("  step1: '%s'\n",s.c_str());
+                }
+
+                for (auto &s : dict)
+                    s = prl_normalizeword(s);
+
+                std::sort(dict.begin(),dict.end());
+
                 for (const auto &s : dict) {
-                    std::string n = prl_normalizeword(s);
-
                     if (debug_out)
-                        printf("  '%s' => '%s'\n",s.c_str(),n.c_str());
+                        printf("  step2: '%s'\n",s.c_str());
 
-                    prl_node_db_search_insert_type_and_node(prl_search_dict_id_filename,node.node_id,n);
+                    prl_node_db_search_insert_type_and_node(prl_search_dict_id_filename,node.node_id,s);
                     kw_count++;
                 }
                 if (debug_out)
