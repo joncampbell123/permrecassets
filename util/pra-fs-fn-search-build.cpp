@@ -37,6 +37,8 @@ int main() {
             while (en.next(node)) {
                 f_count++;
 
+                prl_node_db_search_begin_transaction();
+
                 prl_node_db_search_delete_by_type_and_node(prl_search_dict_id_filename,node.node_id);
 
                 std::vector<std::string> dict = prl_filename2dict(node.name);
@@ -70,6 +72,7 @@ int main() {
 
                 now = time(NULL);
                 if (ref != now) {
+                    prl_node_db_search_commit();
                     printf("\x0D" "files=%llu keywords=%llu" "\x1B[K" "\x1B[?7h",f_count,kw_count);
                     fflush(stdout);
                     ref = now;
@@ -78,6 +81,7 @@ int main() {
             en.end_enum();
         }
 
+        prl_node_db_search_commit();
         printf("\n");
     }
 
