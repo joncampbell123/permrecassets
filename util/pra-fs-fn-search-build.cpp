@@ -28,6 +28,8 @@ int main() {
 
         if (en.begin_enum()) {
             while (en.next(node)) {
+                prl_node_db_search_delete_by_type_and_node(prl_search_dict_id_filename,node.node_id);
+
                 std::vector<std::string> dict = prl_filename2dict(node.name);
                 printf("%s: %s\n",node.node_id.to_string().c_str(),node.name.c_str());
                 for (const auto &s : dict) {

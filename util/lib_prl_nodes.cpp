@@ -24,6 +24,8 @@ using namespace std;
 
 const prluuid prl_zero_node = { 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0 };
 
+const std::string prl_search_dict_id_filename = "FN";
+
 static sqlite3* prl_node_db_scan_sqlite = NULL;
 static sqlite3* prl_node_db_search_sqlite = NULL;
 
