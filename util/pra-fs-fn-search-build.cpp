@@ -17,7 +17,7 @@
 
 using namespace std;
 
-bool debug_out = false;
+static bool debug_out = false;
 
 int main() {
     if (!prl_node_db_open()) {
@@ -53,6 +53,10 @@ int main() {
                     s = prl_normalizeword(s);
 
                 std::sort(dict.begin(),dict.end());
+                {
+                    auto it = std::unique(dict.begin(),dict.end());
+                    if (it != dict.end()) dict.erase(it,dict.end());
+                }
 
                 for (const auto &s : dict) {
                     if (debug_out)
